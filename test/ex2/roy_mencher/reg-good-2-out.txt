@@ -1,0 +1,38 @@
+1: Declaration of class: WRong
+  2: Declaration of field: iii
+   2: Primitive data type: int
+  3: Declaration of field: bool
+   3: Primitive data type: boolean
+  5: Declaration of virtual method: main
+    5: Primitive data type: void
+    5: Parameter: a
+     5: Primitive data type: int
+    6: Declaration of local variable: a
+     6: Primitive data type: int
+    7: Assignment statement
+      7: Reference to variable: a
+      7: Integer literal: 5
+    8: Declaration of local variable: b
+     8: Primitive data type: int
+    9: Declaration of local variable: s, with initial value
+      9: Primitive data type: string
+      9: String literal: "welltyped"
+    10: If statement
+      10: Boolean literal: true
+      10: Block of statements
+    11: If statement
+      11: Boolean literal: false
+      11: Block of statements
+        12: Assignment statement
+          12: Reference to variable: b
+          12: Integer literal: 3
+    13: Method call statement
+     13: Call to static method: a, in class AAA
+  16: Declaration of virtual method: method2
+    16: Primitive data type: int
+    16: Parameter: a
+     16: Primitive data type: int
+    16: Parameter: b
+     16: Primitive data type: int
+    16: Parameter: gfgfg
+     16: User-defined data type: Crreee

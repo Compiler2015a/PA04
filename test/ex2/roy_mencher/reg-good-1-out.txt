@@ -1,0 +1,18 @@
+1: Declaration of class: OK, subclass of Something
+  3: Declaration of field: a
+   3: Primitive data type: int
+  4: Declaration of field: s
+   4: Primitive data type: string
+  6: Declaration of static method: method
+    6: Primitive data type: void
+    7: Assignment statement
+      7: Reference to variable: s
+      7: Integer literal: 5
+10: Declaration of class: OK2
+  12: Declaration of virtual method: main
+    12: Primitive data type: void
+    13: If statement
+      13: Boolean literal: true
+      13: Block of statements
+        14: Break statement
+    15: Continue statement

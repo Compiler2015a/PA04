@@ -1,0 +1,2 @@
+1:6 : syntax error; expexted 'CLASS ID', but found  'toosmall'
+Couldn't repair and continue parse at character 1 of input

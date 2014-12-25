@@ -1,0 +1,48 @@
+import java_cup.runtime.*;
+
+/* Preliminaries to set up and use the scanner.  */
+init with {: scanner.init();              :};
+scan with {: return scanner.next_token(); :};
+
+/* Terminals (tokens returned by the scanner). */
+terminal			VOID_KEYWORD, INT_KEYWORD, BOOLEAN_KEYWORD, STRING_KEYWORD;
+terminal			ID;
+terminal			CLASS_KEYWORD, CLASS_ID, EXTENDS_KEYWORD, STATIC_KEYWORD;
+terminal            SEMI, PLUS, MINUS, TIMES, DIVIDE, MOD;
+terminal            UMINUS, LP, RP, LB, RB, LC, RC, COMMA, SEMICOLON;
+terminal Integer    NUMBER;
+
+/* Non terminals */
+non terminal            classDecl_list, classDecl, class_keyword, type, method_type, class_id,
+						expr_list, expr_part, method, method_list, /* stmnt, stmnt_list, */
+						formal, formal_list;
+non terminal Integer    expr, term, factor;
+
+/* Precedences */
+precedence left PLUS, MINUS;
+precedence left TIMES, DIVIDE, MOD;
+precedence left UMINUS;
+
+/* The grammar */
+program ::= classDecl_list;
+
+classDecl ::= CLASS_KEYWORD CLASS_ID EXTENDS_KEYWORD CLASS_ID LB method_list RB
+			| CLASS_KEYWORD CLASS_ID LB method_list RB; /*Library has no need for (field|method)* */
+			
+classDecl_list ::= classDecl_list classDecl | classDecl;
+			
+method ::= STATIC_KEYWORD method_type ID LP formal_list RP SEMICOLON /* LB stmnt_list RB */
+			| method_type ID LP formal_list RP SEMICOLON; /* LB stmnt_list RB; */
+			
+method_list ::= method_list method | method;
+			
+type ::= INT_KEYWORD | BOOLEAN_KEYWORD | STRING_KEYWORD
+		| CLASS_KEYWORD | type LC RC;
+		
+method_type ::= type | VOID_KEYWORD;
+			
+/* stmnt_list ::= stmnt_list stmnt | stmnt; */
+
+formal ::= type ID;
+
+formals_list ::= formal_list COMMA formal;

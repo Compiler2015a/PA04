@@ -1,0 +1,10 @@
+Parsed E:\TAU\Year3\Compiler\Project\PA02\test\lexicalTest2.txt successfully!
+
+Abstract Syntax Tree: E:\TAU\Year3\Compiler\Project\PA02\test\lexicalTest2.txt
+
+1: Declaration of class: A, subclass of B
+  2: Declaration of virtual method: m
+    2: Primitive data type: void
+    3: Declaration of local variable: s, with initial value
+      3: Primitive data type: string
+      3: String literal: "this \\\\ is lexical check \t !!! \n !!! \" end. "

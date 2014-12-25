@@ -1,0 +1,51 @@
+1: Declaration of class: Library
+  2: Declaration of library method: println
+    2: Primitive data type: void
+    2: Parameter: s
+     2: Primitive data type: string
+  3: Declaration of library method: print
+    3: Primitive data type: void
+    3: Parameter: s
+     3: Primitive data type: string
+  4: Declaration of library method: printi
+    4: Primitive data type: void
+    4: Parameter: i
+     4: Primitive data type: int
+  5: Declaration of library method: printb
+    5: Primitive data type: void
+    5: Parameter: b
+     5: Primitive data type: boolean
+  7: Declaration of library method: readi
+    7: Primitive data type: int
+  8: Declaration of library method: readln
+    8: Primitive data type: string
+  9: Declaration of library method: eof
+    9: Primitive data type: boolean
+  11: Declaration of library method: stoi
+    11: Primitive data type: int
+    11: Parameter: s
+     11: Primitive data type: string
+    11: Parameter: n
+     11: Primitive data type: int
+  13: Declaration of library method: itos
+    13: Primitive data type: string
+    13: Parameter: i
+     13: Primitive data type: int
+  14: Declaration of library method: stoa
+    14: Primitive data type: 1-dimensional array of int
+    14: Parameter: s
+     14: Primitive data type: string
+  15: Declaration of library method: atos
+    15: Primitive data type: string
+    15: Parameter: a
+     15: Primitive data type: 1-dimensional array of int
+  17: Declaration of library method: random
+    17: Primitive data type: int
+    17: Parameter: n
+     17: Primitive data type: int
+  18: Declaration of library method: time
+    18: Primitive data type: int
+  19: Declaration of library method: exit
+    19: Primitive data type: int
+    19: Parameter: i
+     19: Primitive data type: int

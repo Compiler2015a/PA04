@@ -1,0 +1,5 @@
+class A extends B {
+	void m() {
+		string s = "this \\ is lexical check \t !!! \n !!! \" end. ";
+	}
+}

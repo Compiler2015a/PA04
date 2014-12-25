@@ -1,0 +1,148 @@
+package IC.Parser;
+import IC.Parser.Token;
+import java_cup.runtime.*;
+import IC.AST.*;
+import java.util.List;
+import java.util.ArrayList;
+
+/* Parser code */
+
+parser code  {:
+	/** Causes the parsr to print every token it reads.
+	 * This is useful for debugging.
+	 */
+	public boolean printTokens;
+	
+	private LibLexer lexer;
+	private int arrayDimentionCounter = 0;
+	
+	public LibParser(LibLexer lexer) {
+		super(lexer);
+		this.lexer = lexer;
+	}
+	
+	public void syntax_error(Symbol s)
+	{
+        StringBuilder sb = new StringBuilder();
+        Token token = (Token)s;
+        sb.append("expected ");
+        
+        if (s.right > 0) {
+            boolean isFirst = true;
+            expected_token_ids();
+            expected_token_ids();
+            for (Integer expected : expected_token_ids()) {
+                if (!isFirst)
+                    sb.append(" or ");
+                else
+                    isFirst = false;
+
+                sb.append('\'');
+                sb.append(sym.terminalNames[expected]);
+                sb.append('\'');
+            }
+        } else {
+            sb.append("end of input");
+        }
+        if (token == null)
+        {
+            //throw new SyntaxError(sb.toString(), 0, 0);
+        	 System.out.println("0:0 : Syntax error; " + sb.toString());
+        } else {
+            sb.append(", but found \'");
+            sb.append(token.getTag());
+            sb.append('\''); 
+            //throw new SyntaxError(sb.toString(), token.getLine(), token.getColumn());
+            System.out.println("" +token.getLine()+":"+token.getColumn()+" : Syntax error; " + sb.toString());
+        }
+	}
+	
+	public void report_error(String message, Object info)
+	{
+	
+	}
+	
+	public void unrecovered_syntax_error(Symbol cur_token)
+	{
+	
+	}
+:}
+
+/* Preliminaries to set up and use the scanner.  */
+scan with {: 	
+	return lexer.next_token();
+	:};
+
+/* Terminals (tokens returned by the scanner). */
+terminal			VOID_KEYWORD, INT_KEYWORD, BOOLEAN_KEYWORD, STRING_KEYWORD;
+terminal			ID;
+terminal			CLASS_KEYWORD, CLASS_ID, STATIC_KEYWORD;
+terminal            LP, RP, LB, RB, LC, RC, COMMA, SEMICOLON;
+
+/* Non terminals */
+non terminal ICClass libic;
+non terminal LibraryMethod libmethod;
+non terminal List<Method> libmethod_list;
+non terminal List<Formal> formal_list_inter, formal_list, extra_formals;
+non terminal Formal formal;
+non terminal Type type, method_type;
+
+/* Precedences */
+precedence left ID;
+precedence left LC, LP, LB;
+
+/* The grammar */
+
+libic ::= CLASS_KEYWORD:ck CLASS_ID:cid LB libmethod_list:ml RB
+		{: RESULT = new ICClass(ckleft, cid.toString(), new ArrayList<Field>(), ml); :}
+;
+
+
+libmethod_list ::= libmethod_list:ml libmethod:m
+		{: ml.add(m); RESULT = ml; :} 
+		| 
+		{: RESULT = new ArrayList<Method>(); :} 
+;
+
+libmethod ::= STATIC_KEYWORD method_type:mt ID:id LP formal_list_inter:fl RP SEMICOLON
+		{: RESULT = new LibraryMethod(mt, id.toString(), fl); :}
+;
+
+method_type ::= VOID_KEYWORD:v
+		{: RESULT = new PrimitiveType(vleft, IC.DataTypes.VOID); :}
+		| type:t
+		{: RESULT = t; :}
+;
+
+type ::= type:t LC RC
+		{: t.incrementDimension(); RESULT = t; :}
+		| INT_KEYWORD:intKey
+		{: RESULT = new PrimitiveType(intKeyleft, IC.DataTypes.INT); :}
+		| BOOLEAN_KEYWORD:boolKey
+		{: RESULT = new PrimitiveType(boolKeyleft, IC.DataTypes.BOOLEAN); :}
+		| STRING_KEYWORD:strKey
+		{: RESULT = new PrimitiveType(strKeyleft, IC.DataTypes.STRING); :}
+		| CLASS_ID:c
+		{: RESULT = new UserType(cleft, c.toString()); :}
+;
+
+formal_list_inter ::= 
+		{: RESULT = new ArrayList<Formal>(); :}
+		| formal_list:fl
+		{: RESULT =  fl; :}
+;
+
+formal_list ::= formal:f extra_formals:ef 
+		{: ef.add(0, f); RESULT = ef; :} 
+;
+
+extra_formals ::= 
+		{: RESULT = new ArrayList<Formal>(); :}
+		| COMMA formal:f extra_formals:ef
+		{: ef.add(0, f); RESULT = ef; :} 
+;
+
+formal ::= type:t ID:fName
+		{: RESULT = new Formal(t, fName.toString()); :}
+;
+

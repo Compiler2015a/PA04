@@ -1,0 +1,16 @@
+class OK extends Something{
+
+	int a; //gfgghhg
+	string s;
+
+static void method() {
+s=5;}
+}
+
+class OK2 {
+
+void main(){
+if(true) {
+break;}
+continue;
+}}

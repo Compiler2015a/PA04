@@ -1,0 +1,65 @@
+1: Declaration of class: A, Type: A, Symbol table: example2.ic
+  2: Declaration of field: str, Type: string, Symbol table: A
+  3: Declaration of field: i, Type: int, Symbol table: A
+  5: Declaration of static method: sfunc, Type: {boolean -> int}, Symbol table: A
+    5: Parameter: b, Type: boolean, Symbol table: sfunc
+    6: If statement, with Else operation, Symbol table: sfunc
+      6: Reference to variable: b, Type: boolean, Symbol table: sfunc
+      6: Block of statements, Symbol table: sfunc
+        7: Block of statements, Symbol table: statement block in sfunc
+          8: Declaration of local variable: k, with initial value, Type: int, Symbol table: statement block in statement block in sfunc
+            8: Integer literal: 5, Type: int, Symbol table: statement block in statement block in sfunc
+        10: Return statement, with return value, Symbol table: statement block in sfunc
+         10: Integer literal: 1, Type: int, Symbol table: statement block in sfunc
+      12: Block of statements, Symbol table: sfunc
+        13: Declaration of local variable: x, with initial value, Type: A, Symbol table: statement block in sfunc
+          13: Instantiation of class: A, Type: A, Symbol table: statement block in sfunc
+        14: Assignment statement, Symbol table: statement block in sfunc
+          14: Reference to variable: i, in external scope, Type: int, Symbol table: A
+           14: Reference to variable: x, Type: A, Symbol table: statement block in sfunc
+          14: Integer literal: 9, Type: int, Symbol table: statement block in sfunc
+        15: Assignment statement, Symbol table: statement block in sfunc
+          15: Reference to variable: str, in external scope, Type: string, Symbol table: A
+           15: Reference to variable: x, Type: A, Symbol table: statement block in sfunc
+          15: String literal: "hello", Type: string, Symbol table: statement block in sfunc
+        16: Return statement, with return value, Symbol table: statement block in sfunc
+         16: Integer literal: 0, Type: int, Symbol table: statement block in sfunc
+  20: Declaration of virtual method: vfunc, Type: {A, int, int -> void}, Symbol table: A
+    20: Parameter: a, Type: A, Symbol table: vfunc
+    20: Parameter: max, Type: int, Symbol table: vfunc
+    20: Parameter: val, Type: int, Symbol table: vfunc
+    21: Declaration of local variable: arr, with initial value, Type: int[], Symbol table: vfunc
+      21: Array allocation, Type: int[], Symbol table: vfunc
+        21: Reference to variable: max, Type: int, Symbol table: vfunc
+    22: Declaration of local variable: i, with initial value, Type: int, Symbol table: vfunc
+      22: Integer literal: 0, Type: int, Symbol table: vfunc
+    23: While statement, Symbol table: vfunc
+      23: Logical binary operation: less than, Type: boolean, Symbol table: vfunc
+        23: Reference to variable: i, Type: int, Symbol table: vfunc
+        23: Reference to variable: max, Type: int, Symbol table: vfunc
+      23: Block of statements, Symbol table: vfunc
+        24: Assignment statement, Symbol table: statement block in vfunc
+          24: Reference to array, Type: int[], Symbol table: statement block in vfunc
+            24: Reference to variable: arr, Type: int[], Symbol table: statement block in vfunc
+            24: Reference to variable: i, Type: int, Symbol table: statement block in vfunc
+          24: Reference to variable: val, Type: int, Symbol table: statement block in vfunc
+        25: Assignment statement, Symbol table: statement block in vfunc
+          25: Reference to variable: i, Type: int, Symbol table: statement block in vfunc
+          25: Mathematical binary operation: addition, Type: int, Symbol table: statement block in vfunc
+            25: Reference to variable: i, Type: int, Symbol table: statement block in vfunc
+            25: Integer literal: 1, Type: int, Symbol table: statement block in vfunc
+        26: If statement, Symbol table: statement block in vfunc
+          26: Logical binary operation: equality, Type: boolean, Symbol table: statement block in vfunc
+            26: Reference to variable: a, Type: A, Symbol table: statement block in vfunc
+            26: Null literal: null, Type: null, Symbol table: statement block in vfunc
+          27: Break statement, Symbol table: statement block in vfunc
+32: Declaration of class: B, subclass of A, Type: B, Superclass ID: 8, Symbol table: A
+  33: Declaration of field: j, Type: int, Symbol table: B
+  35: Declaration of virtual method: vfunc, Type: {A, int, int -> void}, Symbol table: B
+    35: Parameter: a, Type: A, Symbol table: vfunc
+    35: Parameter: max, Type: int, Symbol table: vfunc
+    35: Parameter: val, Type: int, Symbol table: vfunc
+39: Declaration of class: C, Type: C, Symbol table: example2.ic
+  40: Declaration of static method: main, Type: {string[] -> void}, Symbol table: C
+    40: Parameter: args, Type: string[], Symbol table: main
+    41: Declaration of local variable: a, Type: A[][], Symbol table: main

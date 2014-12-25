@@ -1,0 +1,167 @@
+14: Declaration of class: Sieve
+  16: Declaration of field: num
+   16: Primitive data type: 1-dimensional array of int
+  18: Declaration of virtual method: initArray
+    18: Primitive data type: void
+    19: Declaration of local variable: i, with initial value
+      19: Primitive data type: int
+      19: Integer literal: 0
+    20: While statement
+      20: Logical binary operation: less than
+        20: Reference to variable: i
+        20: Reference to array length
+         20: Reference to variable: num
+      20: Block of statements
+        21: Assignment statement
+          21: Reference to array
+            21: Reference to variable: num
+            21: Reference to variable: i
+          21: Reference to variable: i
+        22: Assignment statement
+          22: Reference to variable: i
+          22: Mathematical binary operation: addition
+            22: Reference to variable: i
+            22: Integer literal: 1
+  26: Declaration of virtual method: sieveAll
+    26: Primitive data type: void
+    27: Declaration of local variable: i, with initial value
+      27: Primitive data type: int
+      27: Integer literal: 2
+    28: While statement
+      28: Logical binary operation: less than
+        28: Reference to variable: i
+        28: Reference to array length
+         28: Reference to variable: num
+      28: Block of statements
+        29: Method call statement
+         29: Call to virtual method: sieve
+           29: Reference to variable: i
+        30: Assignment statement
+          30: Reference to variable: i
+          30: Mathematical binary operation: addition
+            30: Reference to variable: i
+            30: Integer literal: 1
+  34: Declaration of virtual method: sieve
+    34: Primitive data type: void
+    34: Parameter: n
+     34: Primitive data type: int
+    35: Declaration of local variable: i, with initial value
+      35: Primitive data type: int
+      35: Mathematical binary operation: multiplication
+        35: Integer literal: 2
+        35: Reference to variable: n
+    36: While statement
+      36: Logical binary operation: less than
+        36: Reference to variable: i
+        36: Reference to array length
+         36: Reference to variable: num
+      36: Block of statements
+        37: Assignment statement
+          37: Reference to array
+            37: Reference to variable: num
+            37: Reference to variable: i
+          37: Integer literal: 0
+        38: Assignment statement
+          38: Reference to variable: i
+          38: Mathematical binary operation: addition
+            38: Reference to variable: i
+            38: Reference to variable: n
+  42: Declaration of virtual method: printPrimes
+    42: Primitive data type: void
+    43: Declaration of local variable: i, with initial value
+      43: Primitive data type: int
+      43: Integer literal: 2
+    44: Method call statement
+     44: Call to static method: print, in class Library
+       44: String literal: "Primes less than "
+    45: Method call statement
+     45: Call to static method: printi, in class Library
+       45: Reference to array length
+        45: Reference to variable: num
+    46: Method call statement
+     46: Call to static method: print, in class Library
+       46: String literal: ": "
+    47: While statement
+      47: Logical binary operation: less than
+        47: Reference to variable: i
+        47: Reference to array length
+         47: Reference to variable: num
+      47: Block of statements
+        48: If statement
+          48: Logical binary operation: inequality
+            48: Reference to array
+              48: Reference to variable: num
+              48: Reference to variable: i
+            48: Integer literal: 0
+          48: Block of statements
+            49: Method call statement
+             49: Call to static method: printi, in class Library
+               49: Reference to array
+                 49: Reference to variable: num
+                 49: Reference to variable: i
+            50: Method call statement
+             50: Call to static method: print, in class Library
+               50: String literal: " "
+        52: Assignment statement
+          52: Reference to variable: i
+          52: Mathematical binary operation: addition
+            52: Reference to variable: i
+            52: Integer literal: 1
+  57: Declaration of static method: main
+    57: Primitive data type: void
+    57: Parameter: args
+     57: Primitive data type: 1-dimensional array of string
+    58: Method call statement
+     58: Call to virtual method: test, in external scope
+       58: Parenthesized expression
+        58: Instantiation of class: Sieve
+       58: Reference to variable: args
+  61: Declaration of virtual method: test
+    61: Primitive data type: void
+    61: Parameter: args
+     61: Primitive data type: 1-dimensional array of string
+    62: Declaration of local variable: n
+     62: Primitive data type: int
+    64: If statement
+      64: Logical binary operation: inequality
+        64: Reference to array length
+         64: Reference to variable: args
+        64: Integer literal: 1
+      64: Block of statements
+        65: Method call statement
+         65: Call to static method: println, in class Library
+           65: String literal: "Unspecified number."
+        66: Return statement
+    69: Method call statement
+     69: Call to static method: println, in class Library
+       69: String literal: ""
+    70: Assignment statement
+      70: Reference to variable: n
+      70: Call to static method: stoi, in class Library
+        70: Reference to array
+          70: Reference to variable: args
+          70: Integer literal: 0
+        70: Integer literal: 0
+    71: If statement
+      71: Logical binary operation: less than or equal to
+        71: Reference to variable: n
+        71: Integer literal: 0
+      71: Block of statements
+        72: Method call statement
+         72: Call to static method: println, in class Library
+           72: String literal: "Invalid array length"
+        73: Return statement
+    75: Assignment statement
+      75: Reference to variable: num
+      75: Array allocation
+        75: Primitive data type: int
+        75: Reference to variable: n
+    77: Method call statement
+     77: Call to virtual method: initArray
+    78: Method call statement
+     78: Call to virtual method: sieveAll
+    79: Method call statement
+     79: Call to virtual method: printPrimes
+    80: Method call statement
+     80: Call to static method: println, in class Library
+       80: String literal: ""

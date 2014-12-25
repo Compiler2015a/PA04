@@ -1,0 +1,361 @@
+package IC.Parser;
+import java_cup.runtime.*;
+import java.util.ArrayList;
+import java.util.List;
+import IC.AST.*;
+
+parser code  {:
+	/** Causes the parsr to print every token it reads.
+
+	 */
+	public boolean printTokens;
+	
+	private Lexer lexer;
+	private int arrayDimentionCounter = 0;
+	
+	public Parser(Lexer lexer) {
+		super(lexer);
+		this.lexer = lexer;
+	}
+	
+	public void syntax_error(Symbol s)
+	{
+        StringBuilder sb = new StringBuilder();
+        Token token = (Token)s;
+        sb.append("expected ");
+        
+        if (s.right > 0) {
+            boolean isFirst = true;
+            expected_token_ids();
+            expected_token_ids();
+            for (Integer expected : expected_token_ids()) {
+                if (!isFirst)
+                    sb.append(" or ");
+                else
+                    isFirst = false;
+
+                sb.append('\'');
+                sb.append(sym.terminalNames[expected]);
+                sb.append('\'');
+            }
+        } else {
+            sb.append("end of input");
+        }
+        if (token == null)
+        {
+            //throw new SyntaxError(sb.toString(), 0, 0);
+        	 System.out.println("0:0 : Syntax error; " + sb.toString());
+        } else {
+            sb.append(", but found \'");
+            sb.append(token.getTag());
+            sb.append('\''); 
+            //throw new SyntaxError(sb.toString(), token.getLine(), token.getColumn());
+            System.out.println("" +token.getLine()+":"+token.getColumn()+" : Syntax error; " + sb.toString());
+        }
+	}
+	
+	public void report_error(String message, Object info)
+	{
+	
+	}
+	
+	public void unrecovered_syntax_error(Symbol cur_token)
+	{
+	
+	}
+	
+    public boolean inIntRange(String str) {
+	    boolean isNegative = str.charAt(0) == '-';
+	    if (isNegative)
+	        str = str.substring(1);
+	    if (str.length() > 10)
+	        return false;
+	    if (str.length() == 10) {
+	        int comp = str.compareTo("2147483648");
+	        if (comp > 0 || (!isNegative && comp == 0))
+	            return false;
+	    }
+	    return true;
+    }
+	
+	protected class ClassLines
+	{
+		public ClassLines() 
+		{
+			this.methods = new ArrayList<Method>(); 
+			this.fields = new ArrayList<Field>();
+		}
+		public List<Method> methods;
+		public List<Field> fields;
+	} 
+:}
+
+scan with 
+{: 
+	return lexer.next_token();
+:};
+
+/* Terminals (tokens returned by the scanner). */
+terminal			ID, CLASS_ID, SEMICOLON, COMMA;
+
+// Keywords
+terminal			CLASS_KEYWORD, EXTENDS_KEYWORD, STATIC_KEYWORD, VOID_KEYWORD,
+					INT_KEYWORD, BOOLEAN_KEYWORD, STRING_KEYWORD, RETURN_KEYWORD,
+					IF_KEYWORD, ELSE_KEYWORD, WHILE_KEYWORD, BREAK_KEYWORD, CONTINUE_KEYWORD,
+					THIS_KEYWORD, NEW_KEYWORD, LENGTH_KEYWORD;
+
+// Literals
+terminal			TRUE_LITERAL, FALSE_LITERAL, NULL_LITERAL, STRING_LITERAL;
+terminal Integer    INTEGER_LITERAL;
+
+// Operators and signs
+terminal			LP, RP, LC, RC, LB, RB, DOT, EXCLAMATION_MARK, PLUS, MINUS, MULT,
+					DIVIDE, REMINDER, SMALLER_OP, LARGER_OP, SMALLER_EQ_OP, LARGER_EQ_OP,
+					EQUALS_OP, NOT_EQUALS_OP, AND_OP, OR_OP, ASSIGN;
+
+
+// Context terminals
+terminal UMINUS;
+
+/* Non terminals */
+non terminal Program program;
+non terminal List<ICClass> icClass_list;
+non terminal ICClass icClass;
+non terminal ClassLines classLines_list;
+non terminal List<Field> fields;
+non terminal List<String> extra_fields;
+non terminal Method method;
+non terminal List<Formal> formal_list, extra_formals;
+non terminal Formal formal;
+non terminal Type type;
+non terminal List<Statement> stmnt_list; 
+non terminal Statement stmnt, elseStmn;
+non terminal Expression expr, binaryOp, unaryOp;
+non terminal Call call;
+non terminal StaticCall staticCall;
+non terminal VirtualCall virtualCall;
+non terminal List<Expression> arguments, extra_arguments;
+non terminal Location location;
+non terminal Literal literal;
+
+/* Precedences */
+/*precedence left formal, fields, stmnt;
+precedence left method_type;*/
+precedence left ELSE_KEYWORD;
+precedence right ASSIGN;
+precedence left OR_OP;
+precedence left AND_OP;
+precedence left EQUALS_OP, NOT_EQUALS_OP;
+precedence left SMALLER_OP, LARGER_OP, SMALLER_EQ_OP, LARGER_EQ_OP;
+precedence left PLUS, MINUS;
+precedence left MULT, DIVIDE, REMINDER; 
+precedence right UMINUS, EXCLAMATION_MARK;
+/*precedence left ID; */
+precedence left LC, DOT, LP, LB;
+
+/* The grammar */
+program ::= icClass_list:icCl
+			{: RESULT = new Program(icCl); :}
+;
+
+icClass_list ::= icClass_list:icCl icClass:icC
+				 {: icCl.add(icC); RESULT = icCl; :}
+  				 |
+  				 {: RESULT = new ArrayList<ICClass>(); :}
+;
+
+icClass ::= CLASS_KEYWORD:class_key CLASS_ID:cName EXTENDS_KEYWORD CLASS_ID:superCName LB classLines_list:clines RB
+			{: RESULT = new ICClass(class_keyleft, cName.toString(), 
+									superCName.toString(), clines.fields, clines.methods); :} 
+			| CLASS_KEYWORD:class_key CLASS_ID:cName LB classLines_list:clines RB
+			{: RESULT = new ICClass(class_keyleft, cName.toString(), 
+									null, clines.fields, clines.methods); :}
+;				
+
+
+classLines_list ::= classLines_list:clines method:m
+					{: clines.methods.add(m); RESULT = clines; :}
+					| classLines_list:clines fields:fl
+					{: clines.fields.addAll(fl); RESULT = clines; :}
+					| 
+					{: RESULT = new ClassLines(); :}
+;
+
+fields ::=  type:t ID:fName extra_fields:fNamesl
+			{: 
+				fNamesl.add(0, fName.toString());
+				List<Field> fields_list = new ArrayList<Field>();
+				for (int i = 0; i < fNamesl.size(); i++)
+					fields_list.add(new Field(t, fNamesl.get(i))); 
+				RESULT = fields_list; 
+			:}
+;
+
+extra_fields ::= COMMA ID:fName extra_fields:fNamesl
+				 {: 
+				 	fNamesl.add(0, fName.toString());
+				 	RESULT = fNamesl;
+				 :}
+ 				| SEMICOLON
+ 				{: RESULT = new ArrayList<String>(); :}
+;
+
+method ::= STATIC_KEYWORD type:t ID:mName LP formal_list:fl RP LB stmnt_list:sl RB 
+			{: RESULT = new StaticMethod(t, mName.toString(), fl, sl); :}
+			| STATIC_KEYWORD VOID_KEYWORD:v ID:mName LP formal_list:fl RP LB stmnt_list:sl RB 
+			{: RESULT = new StaticMethod(new PrimitiveType(vleft, IC.DataTypes.VOID), mName.toString(), fl, sl); :}
+			| type:t ID:mName LP formal_list:fl RP LB stmnt_list:sl RB
+			{: RESULT = new VirtualMethod(t, mName.toString(), fl, sl); :}
+			| VOID_KEYWORD:v ID:mName LP formal_list:fl RP LB stmnt_list:sl RB
+			{: RESULT = new VirtualMethod(new PrimitiveType(vleft, IC.DataTypes.VOID), mName.toString(), fl, sl); :}
+; 
+
+formal_list ::= formal:f extra_formals:ef 
+				{: ef.add(0, f); RESULT = ef; :} 
+				| 
+				{: RESULT = new ArrayList<Formal>(); :}
+;
+
+extra_formals ::= COMMA formal:f extra_formals:ef
+				 {: ef.add(0, f); RESULT = ef; :} 
+				 | 
+				 {: RESULT = new ArrayList<Formal>(); :}
+;
+
+formal ::= type:t ID:fName
+		{: RESULT = new Formal(t, fName.toString()); :}
+;
+
+type ::= type:t LC RC
+		{: t.incrementDimension(); RESULT = t; :}
+		| INT_KEYWORD:intKey
+		{: RESULT = new PrimitiveType(intKeyleft, IC.DataTypes.INT); :}
+		| BOOLEAN_KEYWORD:boolKey
+		{: RESULT = new PrimitiveType(boolKeyleft, IC.DataTypes.BOOLEAN); :}
+		| STRING_KEYWORD:strKey
+		{: RESULT = new PrimitiveType(strKeyleft, IC.DataTypes.STRING); :}
+		| CLASS_ID:c
+		{: RESULT = new UserType(cleft, c.toString()); :}
+;
+			
+stmnt_list ::= stmnt_list:sl stmnt:s
+	 	{: sl.add(s); RESULT = sl; :}
+		| 
+		{: RESULT = new ArrayList<Statement>(); :}
+; 
+
+stmnt ::= 	location:l ASSIGN expr:exp SEMICOLON 
+			{: RESULT = new Assignment(l, exp); :} |
+			call:c SEMICOLON
+			{: RESULT = new CallStatement(c); :} |
+			RETURN_KEYWORD:ret_key SEMICOLON
+			{: RESULT = new Return(ret_keyleft, null); :} |
+			RETURN_KEYWORD:ret_key expr:exp SEMICOLON
+			{: RESULT = new Return(ret_keyleft, exp); :} |
+			IF_KEYWORD LP expr:condExp RP stmnt:doStmn elseStmn:eStmn
+			{: RESULT = new If(condExp, doStmn, eStmn); :} |
+			WHILE_KEYWORD LP expr:condExp RP stmnt:doStmn 
+			{: RESULT = new While(condExp, doStmn); :} |
+			BREAK_KEYWORD:break_key SEMICOLON
+			{: RESULT = new Break(break_keyleft); :} |
+			CONTINUE_KEYWORD:continue_key SEMICOLON
+			{: RESULT = new Continue(continue_keyleft); :} |
+			LB:lb stmnt_list:sl RB 
+			{: RESULT = new StatementsBlock(lbleft, sl); :} |
+			type:t ID:vName ASSIGN expr:exp SEMICOLON
+			{: RESULT = new LocalVariable(t, vName.toString(), exp); :} |
+			type:t ID:vName SEMICOLON
+			{: RESULT = new LocalVariable(t, vName.toString(), null); :}
+;
+
+elseStmn ::= ELSE_KEYWORD stmnt:s {: RESULT = s; :} | {: RESULT = null; :} ;
+			
+expr ::=	THIS_KEYWORD:ths_key
+			{: RESULT = new This(ths_keyleft); :} |
+			NEW_KEYWORD:n_key CLASS_ID:c LP RP
+			{: RESULT = new NewClass(n_keyleft, c.toString()); :} |
+			NEW_KEYWORD type:t LC expr:exp RC
+			{: t.incrementDimension(); RESULT = new NewArray(t, exp); :} |
+			expr:exp DOT LENGTH_KEYWORD
+			{: RESULT = new Length(exp); :} | 
+			binaryOp:exp {: RESULT = exp; :} | 
+			unaryOp:exp {: RESULT = exp; :} | 
+			literal:l {: RESULT = l; :} | LP expr:exp RP {: RESULT = new ExpressionBlock(exp); :} |
+			location:l {: RESULT = l; :} | call:c {: RESULT = c; :}
+;
+
+binaryOp ::=	expr:exp1 PLUS expr:exp2
+				{: RESULT = new MathBinaryOp(exp1, IC.BinaryOps.PLUS, exp2); :} |
+				expr:exp1 MINUS expr:exp2
+				{: RESULT = new MathBinaryOp(exp1, IC.BinaryOps.MINUS, exp2); :} |
+				expr:exp1 MULT expr:exp2
+				{: RESULT = new MathBinaryOp(exp1, IC.BinaryOps.MULTIPLY, exp2); :} |
+				expr:exp1 DIVIDE expr:exp2
+				{: RESULT = new MathBinaryOp(exp1, IC.BinaryOps.DIVIDE, exp2); :} |
+				expr:exp1 REMINDER expr:exp2
+				{: RESULT = new MathBinaryOp(exp1, IC.BinaryOps.MOD, exp2); :} |
+				expr:exp1 SMALLER_OP expr:exp2
+				{: RESULT = new LogicalBinaryOp(exp1, IC.BinaryOps.LT, exp2); :} |	
+				expr:exp1 LARGER_OP expr:exp2
+				{: RESULT = new LogicalBinaryOp(exp1, IC.BinaryOps.GT, exp2); :} |			
+				expr:exp1 SMALLER_EQ_OP expr:exp2
+				{: RESULT = new LogicalBinaryOp(exp1, IC.BinaryOps.LTE, exp2); :} |		
+				expr:exp1 LARGER_EQ_OP expr:exp2
+				{: RESULT = new LogicalBinaryOp(exp1, IC.BinaryOps.GTE, exp2); :} |	
+				expr:exp1 EQUALS_OP expr:exp2
+				{: RESULT = new LogicalBinaryOp(exp1, IC.BinaryOps.EQUAL, exp2); :}	|		
+				expr:exp1 NOT_EQUALS_OP expr:exp2
+				{: RESULT = new LogicalBinaryOp(exp1, IC.BinaryOps.NEQUAL, exp2); :} |		
+				expr:exp1 AND_OP expr:exp2
+				{: RESULT = new LogicalBinaryOp(exp1, IC.BinaryOps.LAND, exp2); :} |	
+				expr:exp1 OR_OP expr:exp2
+				{: RESULT = new LogicalBinaryOp(exp1, IC.BinaryOps.LOR, exp2); :}
+;
+
+unaryOp ::= EXCLAMATION_MARK expr:exp {: RESULT = new LogicalUnaryOp(IC.UnaryOps.LNEG, exp); :} |
+			MINUS expr:exp {: RESULT = new MathUnaryOp(IC.UnaryOps.UMINUS, exp); :} %prec UMINUS
+;
+
+call ::=	staticCall:sc {: RESULT = sc; :} | virtualCall:vc {: RESULT = vc; :};
+
+staticCall ::= 	CLASS_ID:c DOT ID:m LP arguments:args RP
+				{: RESULT = new StaticCall(cleft, c.toString(), m.toString(), args); :}
+;
+
+virtualCall ::= expr:exp DOT ID:m LP arguments:args RP
+				{: RESULT = new VirtualCall(exp.getLine(), exp, m.toString(), args); :} | 
+				ID:m LP arguments:args RP
+				{: RESULT = new VirtualCall(mleft, null, m.toString(), args); :}
+;
+
+arguments ::=	expr:exp extra_arguments:eArgs 
+				{: eArgs.add(0, exp); RESULT = eArgs; :}	
+				| 
+				{: RESULT = new ArrayList<Expression>(); :}				
+;
+
+extra_arguments ::= COMMA expr:exp extra_arguments:eArgs
+				{: eArgs.add(0, exp); RESULT = eArgs; :}	
+				| 
+				{: RESULT = new ArrayList<Expression>(); :}				
+;
+
+location ::= ID:vName
+			 {: RESULT = new VariableLocation(vNameleft, vName.toString()); :} |
+			 expr:exp DOT ID:vName
+			 {: RESULT = new VariableLocation(vNameleft, exp, vName.toString()); :} | 
+			 expr:exp LC expr:ind_exp RC
+			 {: RESULT = new ArrayLocation(exp, ind_exp); :} 
+;
+
+literal ::= INTEGER_LITERAL:n
+			{: RESULT = new Literal(nleft, IC.LiteralTypes.INTEGER, n); :} |
+			STRING_LITERAL:s
+			{: RESULT = new Literal(sleft, IC.LiteralTypes.STRING, s); :} |
+			TRUE_LITERAL:t
+			{: RESULT = new Literal(tleft, IC.LiteralTypes.TRUE, t); :} |
+			FALSE_LITERAL:f
+			{: RESULT = new Literal(fleft, IC.LiteralTypes.FALSE, f); :} |
+			NULL_LITERAL:n
+			{: RESULT = new Literal(nleft, IC.LiteralTypes.NULL, n); :}
+;

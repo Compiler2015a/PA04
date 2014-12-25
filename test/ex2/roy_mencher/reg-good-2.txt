@@ -1,0 +1,17 @@
+class WRong {
+int iii;
+boolean bool;
+
+void main(int a) {
+int a;
+a=5;
+int b;
+string s="welltyped";
+if(true) {}
+if(false){
+b=3;}
+AAA.a();
+}
+
+int method2(int a,int b ,Crreee gfgfg){}
+}

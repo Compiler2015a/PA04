@@ -1,0 +1,9 @@
+class L { //hey man
+static void main(string[] args){
+// int[1][2] is not a valid type
+/* sup mah
+nigg */
+a = new int[1][2][2];
+string dude = "hello \t\n";
+}
+}

@@ -1,0 +1,72 @@
+Parsed example2.ic successfully!
+
+Global Symbol Table: example2.ic
+    Class: A
+    Class: B
+    Class: C
+Children tables: A, C
+
+Class Symbol Table: A
+    Field: string str
+    Field: int i
+    Static method: sfunc {boolean -> int}
+    Virtual method: vfunc {A, int, int -> void}
+Children tables: sfunc, vfunc, B
+
+Method Symbol Table: sfunc
+    Parameter: boolean b
+Children tables: statement block in sfunc, statement block in sfunc
+
+Statement Block Symbol Table ( located in sfunc )
+Children tables: statement block in statement block in sfunc
+
+Statement Block Symbol Table ( located in statement block in sfunc )
+    Local variable: int k
+
+Statement Block Symbol Table ( located in sfunc )
+    Local variable: A x
+
+Method Symbol Table: vfunc
+    Parameter: A a
+    Parameter: int max
+    Parameter: int val
+    Local variable: int[] arr
+    Local variable: int i
+Children tables: statement block in vfunc
+
+Statement Block Symbol Table ( located in vfunc )
+
+Class Symbol Table: B
+    Field: int j
+    Virtual method: vfunc {A, int, int -> void}
+Children tables: vfunc
+
+Method Symbol Table: vfunc
+    Parameter: A a
+    Parameter: int max
+    Parameter: int val
+
+Class Symbol Table: C
+    Static method: main {string[] -> void}
+Children tables: main
+
+Method Symbol Table: main
+    Parameter: string[] args
+    Local variable: A[][] a
+
+Type Table: example2.ic
+    1: Primitive type: int
+    2: Primitive type: boolean
+    3: Primitive type: null
+    4: Primitive type: string
+    5: Primitive type: void
+    8: Class: A
+    12: Class: B, Superclass ID: 8
+    13: Class: C
+    6: Array type: string[]
+    11: Array type: int[]
+    14: Array type: A[]
+    15: Array type: A[][]
+    7: Method type: {string[] -> void}
+    9: Method type: {boolean -> int}
+    10: Method type: {A, int, int -> void}

@@ -1,0 +1,142 @@
+Parsed libic.sig successfully!
+Parsed example1.ic successfully!
+
+Global Symbol Table: example1.ic
+    Class: Library
+    Class: A
+    Class: B
+    Class: C
+Children tables: Library, A, C
+
+Class Symbol Table: Library
+    Static method: println {string -> void}
+    Static method: print {string -> void}
+    Static method: printi {int -> void}
+    Static method: printb {boolean -> void}
+    Static method: readi { -> int}
+    Static method: readln { -> string}
+    Static method: eof { -> boolean}
+    Static method: stoi {string, int -> int}
+    Static method: itos {int -> string}
+    Static method: stoa {string -> int[]}
+    Static method: atos {int[] -> string}
+    Static method: random {int -> int}
+    Static method: time { -> int}
+    Static method: exit {int -> int}
+Children tables: println, print, printi, printb, readi, readln, eof, stoi, itos, stoa, atos, random, time, exit
+
+Method Symbol Table: println
+    Parameter: string s
+
+Method Symbol Table: print
+    Parameter: string s
+
+Method Symbol Table: printi
+    Parameter: int i
+
+Method Symbol Table: printb
+    Parameter: boolean b
+
+Method Symbol Table: readi
+
+Method Symbol Table: readln
+
+Method Symbol Table: eof
+
+Method Symbol Table: stoi
+    Parameter: string s
+    Parameter: int n
+
+Method Symbol Table: itos
+    Parameter: int i
+
+Method Symbol Table: stoa
+    Parameter: string s
+
+Method Symbol Table: atos
+    Parameter: int[] a
+
+Method Symbol Table: random
+    Parameter: int n
+
+Method Symbol Table: time
+
+Method Symbol Table: exit
+    Parameter: int i
+
+Class Symbol Table: A
+    Field: string str
+    Field: int i
+    Static method: sfunc {boolean -> int}
+    Virtual method: vfunc {A, int, int -> void}
+Children tables: sfunc, vfunc, B
+
+Method Symbol Table: sfunc
+    Parameter: boolean b
+Children tables: statement block in sfunc, statement block in sfunc
+
+Statement Block Symbol Table ( located in sfunc )
+Children tables: statement block in statement block in sfunc
+
+Statement Block Symbol Table ( located in statement block in sfunc )
+    Local variable: int k
+
+Statement Block Symbol Table ( located in sfunc )
+    Local variable: A x
+
+Method Symbol Table: vfunc
+    Parameter: A a
+    Parameter: int max
+    Parameter: int val
+    Local variable: int[] arr
+    Local variable: int i
+Children tables: statement block in vfunc
+
+Statement Block Symbol Table ( located in vfunc )
+
+Class Symbol Table: B
+    Field: int j
+    Virtual method: vfunc {A, int, int -> void}
+Children tables: vfunc
+
+Method Symbol Table: vfunc
+    Parameter: A a
+    Parameter: int max
+    Parameter: int val
+
+Class Symbol Table: C
+    Static method: main {string[] -> void}
+Children tables: main
+
+Method Symbol Table: main
+    Parameter: string[] args
+    Local variable: A[][] a
+
+Type Table: example1.ic
+    1: Primitive type: int
+    2: Primitive type: boolean
+    3: Primitive type: null
+    4: Primitive type: string
+    5: Primitive type: void
+    8: Class: Library
+    21: Class: A
+    24: Class: B, Superclass ID: 21
+    25: Class: C
+    6: Array type: string[]
+    17: Array type: int[]
+    26: Array type: A[]
+    27: Array type: A[][]
+    7: Method type: {string[] -> void}
+    9: Method type: {string -> void}
+    10: Method type: {int -> void}
+    11: Method type: {boolean -> void}
+    12: Method type: { -> int}
+    13: Method type: { -> string}
+    14: Method type: { -> boolean}
+    15: Method type: {string, int -> int}
+    16: Method type: {int -> string}
+    18: Method type: {string -> int[]}
+    19: Method type: {int[] -> string}
+    20: Method type: {int -> int}
+    22: Method type: {boolean -> int}
+    23: Method type: {A, int, int -> void}

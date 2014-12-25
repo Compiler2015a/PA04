@@ -1,0 +1,88 @@
+class A {
+
+	/* testing type
+	rules and some other stuff 
+	this should all be compiled ok*/
+	
+	static void main (string[] args) {
+	//boolean literals
+	boolean t = true;
+	boolean f = false;
+	
+	//integer literals
+	int i = 5;
+	
+	//string literal
+	string s = "hello";
+	
+	//array
+	int[] a = new int[5];
+	
+	//operands and operators
+	if(5 < i+i)
+	if(i-i > 5)
+	if(i/i > 5)
+	if(i*i > 5)
+	if(i*i%3 > 5)
+	
+	if(s+s == "hellohello")
+	if(s+s != "hellohello")
+	if(i+i == 5)
+	if(i+i != 5)
+	
+	if(i+i >= 5)
+	if(i+i <= 5)
+	if(i+i < 5)
+	
+	if(t && f)
+	if(t || f)
+	
+	i=-5;
+	
+	if(a[0] > 5)
+	
+	if(!t)
+	
+	if(a.length > 5)
+	
+	B b = new B();
+	
+	if(null == null)
+	
+	if(b.bint > 5)
+	
+	if(no(i,t))
+	
+	int s1 = B.test1(1, "s");
+	
+	if(b.yes(i,f))
+		i=5;
+	else
+		i=6;
+	
+	while(!no(i,f))
+		break;
+	
+	while(i!=5) {
+		i=5;
+		continue;
+	}
+	
+	no(i,t);
+	
+	
+	
+	}
+	
+	boolean no(int a, boolean b) {
+		return false;
+	}
+}
+
+class B {
+	int bint;
+	static int test1(int arg1, string srg2) { }
+	boolean yes(int a, boolean b) {
+		return true;
+	}
+}
