@@ -1,4 +1,4 @@
-package IC.LIR;
+package IC.lir;
 
 import java.util.HashMap;
 import java.util.Map;

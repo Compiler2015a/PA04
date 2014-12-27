@@ -1,4 +1,4 @@
-package IC.LIR;
+package IC.lir;
 
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
