@@ -23,6 +23,7 @@ import IC.AST.NewClass;
 import IC.AST.PrimitiveType;
 import IC.AST.Program;
 import IC.AST.Return;
+import IC.AST.Statement;
 import IC.AST.StatementsBlock;
 import IC.AST.StaticCall;
 import IC.AST.StaticMethod;
@@ -33,9 +34,23 @@ import IC.AST.VirtualCall;
 import IC.AST.VirtualMethod;
 import IC.AST.Visitor;
 import IC.AST.While;
+import IC.BinaryOps;
 
 public class TranslationVisitor implements Visitor{
-
+	int target;
+	int labels;
+	ClassLayout classLayout;
+	StringLiterals stringLiterals;
+	StringBuilder emitted;
+	
+	public TranslationVisitor() {
+		this.target = 0;
+		this.labels = 0;
+		this.classLayout = new ClassLayout();
+		this.stringLiterals = new StringLiterals();
+		this.emitted = new StringBuilder();
+	}
+	
 	@Override
 	public Object visit(Program program) {
 		// TODO Auto-generated method stub
@@ -134,7 +149,8 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(StatementsBlock statementsBlock) {
-		// TODO Auto-generated method stub
+		for(Statement stmnt : statementsBlock.getStatements())
+			stmnt.accept(this);
 		return null;
 	}
 
@@ -194,13 +210,143 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(MathBinaryOp binaryOp) {
-		// TODO Auto-generated method stub
+		binaryOp.getFirstOperand().accept(this);
+		target++;
+		binaryOp.getSecondOperand().accept(this);
+		
+		switch(binaryOp.getOperator()) {
+		case PLUS: //TODO: what about __stringCat ?
+			emit("Add R"+target+",R"+(--target));
+			break;
+		case MINUS:
+			emit("Sub R"+target+",R"+(--target));
+			break;
+		case DIVIDE:
+			emit("Div R"+target+",R"+(--target));
+			break;
+		case MULTIPLY:
+			emit("Mul R"+target+",R"+(--target));
+			break;
+		case MOD:
+			emit("Mod R"+target+",R"+(--target));
+			break;
+		default:
+			
+		}
+		
 		return null;
 	}
 
 	@Override
 	public Object visit(LogicalBinaryOp binaryOp) {
-		// TODO Auto-generated method stub
+		
+		//target++;
+		//binaryOp.getSecondOperand().accept(this);
+		
+		switch(binaryOp.getOperator()) {
+		case GT:
+			binaryOp.getSecondOperand().accept(this);
+			target++;
+			binaryOp.getFirstOperand().accept(this);
+			emit("Compare R,"+target+",R"+(--target));
+			emit("JumpG _true_label"+labels);
+			emit("Move 0,R"+target);
+			emit("Jump _end_label"+labels);
+			emit("_true_label"+labels);
+			emit("Move 1,R"+target);
+			emit("_end_label"+labels);
+			labels++;
+			break;
+		case GTE:
+			binaryOp.getSecondOperand().accept(this);
+			target++;
+			binaryOp.getFirstOperand().accept(this);
+			emit("Compare R,"+target+",R"+(--target));
+			emit("JumpGE _true_label"+labels);
+			emit("Move 0,R"+target);
+			emit("Jump _end_label"+labels);
+			emit("_true_label"+labels);
+			emit("Move 1,R"+target);
+			emit("_end_label"+labels);
+			labels++;
+			break;
+		case EQUAL:
+			binaryOp.getSecondOperand().accept(this);
+			target++;
+			binaryOp.getFirstOperand().accept(this);
+			emit("Compare R,"+target+",R"+(--target));
+			emit("JumpFalse _true_label"+labels);
+			emit("Move 0,R"+target);
+			emit("Jump _end_label"+labels);
+			emit("_true_label"+labels);
+			emit("Move 1,R"+target);
+			emit("_end_label"+labels);
+			labels++;
+			break;
+		case NEQUAL:
+			binaryOp.getSecondOperand().accept(this);
+			target++;
+			binaryOp.getFirstOperand().accept(this);
+			emit("Compare R,"+target+",R"+(--target));
+			emit("JumpFalse _false_label"+labels);
+			emit("Move 1,R"+target);
+			emit("Jump _end_label"+labels);
+			emit("_false_label"+labels);
+			emit("Move 0,R"+target);
+			emit("_end_label"+labels);
+			labels++;
+			break;
+		case LT:
+			binaryOp.getSecondOperand().accept(this);
+			target++;
+			binaryOp.getFirstOperand().accept(this);
+			emit("Compare R,"+target+",R"+(--target));
+			emit("JumpL _true_label"+labels);
+			emit("Move 0,R"+target);
+			emit("Jump _end_label"+labels);
+			emit("_true_label"+labels);
+			emit("Move 1,R"+target);
+			emit("_end_label"+labels);
+			labels++;
+			break;
+		case LTE:
+			binaryOp.getSecondOperand().accept(this);
+			target++;
+			binaryOp.getFirstOperand().accept(this);
+			emit("Compare R,"+target+",R"+(--target));
+			emit("JumpLE _true_label"+labels);
+			emit("Move 0,R"+target);
+			emit("Jump _end_label"+labels);
+			emit("_true_label"+labels);
+			emit("Move 1,R"+target);
+			emit("_end_label"+labels);
+			labels++;
+			break;
+		case LAND:
+			binaryOp.getFirstOperand().accept(this);
+			emit("Compare 0,R"+target);
+			emit("JumpTrue _end_label"+labels);
+			target++;
+			binaryOp.getSecondOperand().accept(this);
+			emit("And R"+target+",R"+(--target));
+			emit("_end_label"+labels);
+			labels++;
+			break;
+		case LOR:
+			binaryOp.getFirstOperand().accept(this);
+			emit("Compare 1,R"+target);
+			emit("JumpTrue _end_label"+labels);
+			target++;
+			binaryOp.getSecondOperand().accept(this);
+			emit("Or R"+target+",R"+(--target));
+			emit("_end_label"+labels);
+			labels++;
+			break;
+		default:
+			
+		}
+		
+
 		return null;
 	}
 
@@ -226,6 +372,10 @@ public class TranslationVisitor implements Visitor{
 	public Object visit(ExpressionBlock expressionBlock) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public void emit(String s) {
+		emitted.append(s+"\n");
 	}
 
 }
