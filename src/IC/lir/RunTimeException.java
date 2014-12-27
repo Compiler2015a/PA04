@@ -1,4 +1,4 @@
-package IC.LIR;
+package IC.lir;
 
 public class RunTimeException extends RuntimeException {
 	private int line;

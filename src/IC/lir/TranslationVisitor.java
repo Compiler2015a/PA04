@@ -1,8 +1,9 @@
-package IC.LIR;
+package IC.lir;
 
 import java.util.Map;
 
 import IC.AST.*;
+import IC.Types.Type;
 import IC.BinaryOps;
 
 public class TranslationVisitor implements Visitor{
@@ -110,8 +111,33 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(If ifStatement) {
-		// TODO Auto-generated method stub
-		return null;
+		if (!(Boolean)ifStatement.getCondition().accept(this))
+			return false;
+		
+		Type typeCondition = ifStatement.getCondition().getEntryType();
+		emit("R"+target+" := "+ typeCondition);
+		emit("Compare 0,R"+target);
+		
+		String endIfLabel="_end_label"+labels++;
+		if (ifStatement.hasElse()) 
+		{
+			String elseLabel ="_false_label"+labels++;
+			emit("JumpTrue "+elseLabel);
+			// print "then"
+	        ifStatement.getOperation().accept(this);
+	        emit("Jump "+endIfLabel);
+	        emit(elseLabel+":");
+	        // print else
+		}
+		else
+		{
+			emit("JumpTrue "+endIfLabel);
+			// print "then"
+	        ifStatement.getOperation().accept(this);
+		}
+		// end-if
+		emit(endIfLabel+":");
+		return true;
 	}
 
 	@Override
@@ -198,28 +224,28 @@ public class TranslationVisitor implements Visitor{
 		binaryOp.getFirstOperand().accept(this);
 		target++;
 		binaryOp.getSecondOperand().accept(this);
-		
+		String instruction="";
 		switch(binaryOp.getOperator()) {
 		case PLUS: //TODO: what about __stringCat ?
-			emit("Add R"+target+",R"+(--target));
+			instruction="Add";
 			break;
 		case MINUS:
-			emit("Sub R"+target+",R"+(--target));
+			instruction="Sub";
 			break;
 		case DIVIDE:
-			emit("Div R"+target+",R"+(--target));
+			instruction="Div";
 			break;
 		case MULTIPLY:
-			emit("Mul R"+target+",R"+(--target));
+			instruction="Mul";
 			break;
 		case MOD:
-			emit("Mod R"+target+",R"+(--target));
+			instruction="Mod";
 			break;
 		default:
 			
 		}
-		
-		return null;
+		emit(instruction+" R"+target+",R"+(--target));
+		return true;
 	}
 
 	@Override
