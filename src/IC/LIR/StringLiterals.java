@@ -1,4 +1,4 @@
-package IC.lir;
+package IC.LIR;
 
 import java.util.ArrayList;
 import java.util.List;

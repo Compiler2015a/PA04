@@ -1,39 +1,8 @@
-package IC.lir;
+package IC.LIR;
 
-import IC.AST.ArrayLocation;
-import IC.AST.Assignment;
-import IC.AST.Break;
-import IC.AST.CallStatement;
-import IC.AST.Continue;
-import IC.AST.ExpressionBlock;
-import IC.AST.Field;
-import IC.AST.Formal;
-import IC.AST.ICClass;
-import IC.AST.If;
-import IC.AST.Length;
-import IC.AST.LibraryMethod;
-import IC.AST.Literal;
-import IC.AST.LocalVariable;
-import IC.AST.LogicalBinaryOp;
-import IC.AST.LogicalUnaryOp;
-import IC.AST.MathBinaryOp;
-import IC.AST.MathUnaryOp;
-import IC.AST.NewArray;
-import IC.AST.NewClass;
-import IC.AST.PrimitiveType;
-import IC.AST.Program;
-import IC.AST.Return;
-import IC.AST.Statement;
-import IC.AST.StatementsBlock;
-import IC.AST.StaticCall;
-import IC.AST.StaticMethod;
-import IC.AST.This;
-import IC.AST.UserType;
-import IC.AST.VariableLocation;
-import IC.AST.VirtualCall;
-import IC.AST.VirtualMethod;
-import IC.AST.Visitor;
-import IC.AST.While;
+import java.util.Map;
+
+import IC.AST.*;
 import IC.BinaryOps;
 
 public class TranslationVisitor implements Visitor{
@@ -42,6 +11,15 @@ public class TranslationVisitor implements Visitor{
 	ClassLayout classLayout;
 	StringLiterals stringLiterals;
 	StringBuilder emitted;
+    
+	// errors
+    private boolean[] _hasErrors;
+    private final String[] _errorStrings = {
+            "Runtime error: Null pointer dereference!",
+            "Runtime error: Array index out of bounds!",
+            "Runtime error: Array allocation with negative array size!",
+            "Runtime error: Division by zero!"
+    };
 	
 	public TranslationVisitor() {
 		this.target = 0;
@@ -49,18 +27,25 @@ public class TranslationVisitor implements Visitor{
 		this.classLayout = new ClassLayout();
 		this.stringLiterals = new StringLiterals();
 		this.emitted = new StringBuilder();
+		_hasErrors = new boolean[4];
 	}
 	
 	@Override
 	public Object visit(Program program) {
-		// TODO Auto-generated method stub
-		return null;
+		for (ICClass cls : program.getClasses()) {
+			if (!(Boolean)cls.accept(this))
+				return false;
+		}
+		return true;
 	}
 
 	@Override
 	public Object visit(ICClass icClass) {
-		// TODO Auto-generated method stub
-		return null;
+		for (Method method : icClass.getMethods()) 
+			if (!(Boolean)method.accept(this))
+				return false;
+		
+		return true;
 	}
 
 	@Override

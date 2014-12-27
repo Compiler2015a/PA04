@@ -17,6 +17,8 @@ public abstract class Method extends ASTNode {
 
 	protected List<Statement> statements;
 
+    private boolean hasFlowWithoutReturn;
+    
 	/**
 	 * Constructs a new method node. Used by subclasses.
 	 * 
@@ -53,4 +55,12 @@ public abstract class Method extends ASTNode {
 	public List<Statement> getStatements() {
 		return statements;
 	}
+	
+	public void setHasFlowWithoutReturn() {
+        this.hasFlowWithoutReturn = true;
+    }
+
+    public boolean doesHaveFlowWithoutReturn() {
+        return this.hasFlowWithoutReturn;
+    }
 }
