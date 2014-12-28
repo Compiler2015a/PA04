@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/mor hoyda/Desktop/לימודים- תל אביב/קומפילציה/תרגילים שלנו/Ex1/Ex1/Ex1/Jflex Installs/java-cup-11b.jar"/>
-	<classpathentry kind="lib" path="C:/Users/mor hoyda/Desktop/לימודים- תל אביב/קומפילציה/תרגילים שלנו/Ex1/Ex1/Ex1/Jflex Installs/jflex-1.6.0.zip"/>
+	<classpathentry kind="lib" path="C:/jflex-1.6.0/lib/java-cup-11b.jar"/>
+	<classpathentry kind="lib" path="C:/jflex-1.6.0/lib/jflex-1.6.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

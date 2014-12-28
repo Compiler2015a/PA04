@@ -7,14 +7,18 @@ import java.util.Stack;
 import IC.AST.*;
 import IC.Types.Type;
 import IC.BinaryOps;
+import IC.LiteralTypes;
 
 public class TranslationVisitor implements Visitor{
 	int target;
 	int labels;
-	ClassLayout classLayout;
 	StringLiterals stringLiterals;
 	StringBuilder emitted;
     String _currentClass;
+    
+    //class layouts
+    Map<ICClass, ClassLayout> classLayouts;
+    
 	// errors
     private boolean[] _hasErrors;
     private final String[] _errorStrings = {
@@ -34,7 +38,7 @@ public class TranslationVisitor implements Visitor{
 	public TranslationVisitor() {
 		this.target = 0;
 		this.labels = 0;
-		this.classLayout = new ClassLayout();
+		this.classLayouts = new HashMap<ICClass,ClassLayout>();
 		this.stringLiterals = new StringLiterals();
 		this.emitted = new StringBuilder();
 		_hasErrors = new boolean[4];
@@ -52,10 +56,21 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(ICClass icClass) {
-		for (Method method : icClass.getMethods()) 
+		ClassLayout cl = new ClassLayout();
+		
+		for (Field field : icClass.getFields()) {
+			if(!(Boolean)field.accept(this))
+				return false;
+			cl.addField(field);
+		}
+		
+		for (Method method : icClass.getMethods()) {
 			if (!(Boolean)method.accept(this))
 				return false;
+			cl.addMethod(method);
+		}
 		
+		classLayouts.put(icClass, cl);
 		return true;
 	}
 
@@ -108,7 +123,7 @@ public class TranslationVisitor implements Visitor{
         // if in non-returning function, add a dummy return
         if (method.doesHaveFlowWithoutReturn())
             //not sure about the value 
-        	emit("return dummy");
+        	emit("Return dummy");
 
 		return true;
 	}
@@ -415,7 +430,25 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(Literal literal) {
-		// TODO Auto-generated method stub
+		switch(literal.getType()) {
+		case STRING:
+			emit("Move str"+stringLiterals.add((String)literal.getValue())+",R"+target); //catelog the string and emit it
+			break;
+		case INTEGER:
+			emit("Move "+((Integer)literal.getValue())+",R"+target);
+			break;
+		case TRUE:
+			emit("Move 1,R"+target);
+			break;
+		case FALSE:
+			emit("Move 0,R"+target);
+			break;
+		case NULL:
+			emit("Move 0,R"+target);
+			break;
+		default:
+			
+		}
 		return null;
 	}
 

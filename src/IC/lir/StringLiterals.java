@@ -10,8 +10,13 @@ public class StringLiterals {
 		literals = new ArrayList<String>();
 	}
 	
-	public void add(String s) {
+	/**
+	 * @param s string to add to string literals
+	 * @return index of string in string literals
+	 */
+	public int add(String s) {
 		literals.add(s);
+		return literals.indexOf(s);
 	}
 	
 	@Override
