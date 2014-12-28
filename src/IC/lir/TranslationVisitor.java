@@ -271,7 +271,10 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(Length length) {
-		// TODO Auto-generated method stub
+		target++;
+		length.getArray().accept(this);
+		target--;
+		emit("ArrayLength R"+(target+1)+",R"+target);
 		return null;
 	}
 
