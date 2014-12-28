@@ -8,6 +8,7 @@ import IC.AST.*;
 import IC.Types.Type;
 import IC.BinaryOps;
 import IC.LiteralTypes;
+import IC.UnaryOps;
 
 public class TranslationVisitor implements Visitor{
 	int target;
@@ -418,14 +419,26 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(MathUnaryOp unaryOp) {
-		// TODO Auto-generated method stub
-		return null;
+		if (unaryOp.getOperator() == UnaryOps.UMINUS) {
+			unaryOp.getOperand().accept(this);
+			emit("Mult -1,R"+target);
+			return true;
+		}
+			
+		return false;
 	}
 
 	@Override
 	public Object visit(LogicalUnaryOp unaryOp) {
-		// TODO Auto-generated method stub
-		return null;
+		if(unaryOp.getOperator() == UnaryOps.LNEG) {
+			target++;
+			unaryOp.getOperand().accept(this);
+			target--;
+			emit("Move 1,R"+target);
+			emit("Sub R"+(target-1)+",R"+target);
+			return true;
+		}
+		return false;
 	}
 
 	@Override
