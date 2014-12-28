@@ -10,6 +10,7 @@ import IC.SemanticAnalysis.SemanticError;
 import IC.SemanticAnalysis.SemanticErrorThrower;
 import IC.SymbolsTable.*;
 import IC.Types.*;
+import IC.lir.TranslationVisitor;
 
 public class Compiler {
 
@@ -66,6 +67,9 @@ public class Compiler {
 			TypeValidator tv = new TypeValidator(typeTableBuilder.getBuiltTypeTable());
 			tv.validate(ICRoot);
 			
+			TranslationVisitor trv=new TranslationVisitor();
+			ICRoot.accept(trv);
+			System.out.println(trv.getEmissionString());
 
 			if(isInArgs(args, "-print-ast")) {
 				//Pretty-print the program to System.out

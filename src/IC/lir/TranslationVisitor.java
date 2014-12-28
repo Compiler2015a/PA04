@@ -1,6 +1,8 @@
 package IC.lir;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 import IC.AST.*;
 import IC.Types.Type;
@@ -12,7 +14,7 @@ public class TranslationVisitor implements Visitor{
 	ClassLayout classLayout;
 	StringLiterals stringLiterals;
 	StringBuilder emitted;
-    
+    String _currentClass;
 	// errors
     private boolean[] _hasErrors;
     private final String[] _errorStrings = {
@@ -21,6 +23,13 @@ public class TranslationVisitor implements Visitor{
             "Runtime error: Array allocation with negative array size!",
             "Runtime error: Division by zero!"
     };
+    
+    // registers
+    private Map<String, Integer> _registers;
+    private int _nextRegisterNum;
+    //labels
+    private Stack<String> _whileLabelStack;
+    private Stack<String> _endWhileLabelStack;
 	
 	public TranslationVisitor() {
 		this.target = 0;
@@ -34,6 +43,7 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(Program program) {
 		for (ICClass cls : program.getClasses()) {
+			_currentClass = cls.getName();
 			if (!(Boolean)cls.accept(this))
 				return false;
 		}
@@ -51,26 +61,56 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(Field field) {
-		// TODO Auto-generated method stub
+		//System.out.println("1");
 		return null;
 	}
 
 	@Override
 	public Object visit(VirtualMethod method) {
-		// TODO Auto-generated method stub
-		return null;
+		//System.out.println("2");
+		return visitMethod(method);
 	}
 
 	@Override
 	public Object visit(StaticMethod method) {
-		// TODO Auto-generated method stub
-		return null;
+		//System.out.println("3");
+		return visitMethod(method);
 	}
 
 	@Override
 	public Object visit(LibraryMethod method) {
-		// TODO Auto-generated method stub
-		return null;
+		//System.out.println("4");
+		return true;
+	}
+	
+	private Object visitMethod(Method method)
+	{
+		int startLine = target;
+
+        // add method label
+        String fullMethodName = getMethodName(_currentClass, method.getName());
+        emit(fullMethodName+":");
+
+        // add new registers for this method
+        _registers = new HashMap<>();
+        _nextRegisterNum = 0;
+
+
+        for (Formal formal : method.getFormals()) {
+            formal.accept(this);
+        }
+
+        // add all statements
+        for (Statement stmt : method.getStatements()) {
+            stmt.accept(this);
+        }
+
+        // if in non-returning function, add a dummy return
+        if (method.doesHaveFlowWithoutReturn())
+            //not sure about the value 
+        	emit("return dummy");
+
+		return true;
 	}
 
 	@Override
@@ -111,9 +151,9 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(If ifStatement) {
+		//System.out.println("bla "+ifStatement.getCondition()+"\n");
 		if (!(Boolean)ifStatement.getCondition().accept(this))
 			return false;
-		
 		Type typeCondition = ifStatement.getCondition().getEntryType();
 		emit("R"+target+" := "+ typeCondition);
 		emit("Compare 0,R"+target);
@@ -358,7 +398,7 @@ public class TranslationVisitor implements Visitor{
 		}
 		
 
-		return null;
+		return true;
 	}
 
 	@Override
@@ -381,12 +421,28 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(ExpressionBlock expressionBlock) {
-		// TODO Auto-generated method stub
-		return null;
+		if (!(Boolean)expressionBlock.getExpression().accept(this))
+			return false;
+		return true;
 	}
 	
 	public void emit(String s) {
 		emitted.append(s+"\n");
 	}
+	
+    private String getMethodName(String className, String name) {
+        if (name.equals("main"))
+            return "_ic_main";
+
+        if (className.equals("Library"))
+            return name;
+
+        return className + "_" + name;
+    }
+    
+    public String getEmissionString()
+    {
+    	return this.emitted.toString();
+    }
 
 }
