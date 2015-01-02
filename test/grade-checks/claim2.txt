@@ -1,0 +1,6 @@
+class A { static void main(string[] args) { } }
+class B extends A{ 
+	A foo() { return null; } //correct
+	A foo1() { return new B(); } //correct
+	B foo2() { return new A(); } // not correct
+}

@@ -1,0 +1,21 @@
+class A {
+  string str;
+  int i;
+  B b;
+  C foo(int x) { return null; } 
+}
+
+class B extends A {
+    int j;
+
+    void vfunc(A a, int max, int val) {
+		int i = 2147483647;
+    }
+}
+
+class C extends B{
+  static void main(string[] args) {
+    A[][] a;
+  }
+  C foo(int x) { return null; } 
+}

@@ -68,8 +68,8 @@ public class Compiler {
 			tv.validate(ICRoot);
 			
 			TranslationVisitor trv=new TranslationVisitor();
-			ICRoot.accept(trv);
-			System.out.println(trv.getEmissionString());
+		//	ICRoot.accept(trv);
+			//System.out.println(trv.getEmissionString());
 
 			if(isInArgs(args, "-print-ast")) {
 				//Pretty-print the program to System.out

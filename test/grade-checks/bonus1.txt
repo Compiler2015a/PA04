@@ -1,0 +1,13 @@
+class A {
+	static void main(string[] args) { }
+	A foo() {
+		if (true)
+			return null;
+		else {
+			if (false)
+				return new A();
+			else return null;
+		}
+	
+	}
+}

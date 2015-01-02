@@ -249,6 +249,10 @@ public class TypeValidator implements Visitor {
 			return false;
 		}
 		
+		if (!typeArray.isArrayType()) {
+			semanticErrorThrower = new SemanticErrorThrower(location.getLine(), "Array location must have an array type");
+			return false;
+		}
 		// Set the type of the array location with array T[] to be T.
 		location.setEntryType(typeTable.getTypeFromArray(typeArray));
 		return true;

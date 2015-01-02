@@ -522,6 +522,7 @@ public class SymbolsTableBuilder implements Visitor {
 					else
 						break;
 				}
+				scanningTable = scanningTable.getParentSymbolTable();
 			}
 		}
 		table.addEntry(entry.getId(), entry);

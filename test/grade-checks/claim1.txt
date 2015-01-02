@@ -1,0 +1,13 @@
+
+class B { 
+int[] arr23;
+	static void main(string[] args) { }
+	int foo1(int x) 
+	{ 
+		int[] arr2 = new int[3];
+		B b = new B();
+		int i = b.arr[0] + arr2[1];
+		return i;
+	}
+}
+
