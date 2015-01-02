@@ -37,4 +37,10 @@ public class ClassLayout {
 			fieldToOffset.put(f, fieldToOffset.size());
 		return fieldToOffset.get(f);
 	}
+	
+	@Override
+	public String toString() {
+		//TODO: DO THIS
+		return null;
+	}
 }
