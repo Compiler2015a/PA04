@@ -21,7 +21,8 @@ public class Registers {
 		if (regs.containsKey(index))
 			return regs.get(index);
 		else {
-			
+			regs.put(index,new Reg("R"+index));
+			return regs.get(index);
 		}
 	}
 }
