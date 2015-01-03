@@ -1,14 +1,53 @@
 package IC.lir;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import IC.AST.*;
-import IC.Types.Type;
-import IC.BinaryOps;
-import IC.LiteralTypes;
 import IC.UnaryOps;
+import IC.AST.ArrayLocation;
+import IC.AST.Assignment;
+import IC.AST.Break;
+import IC.AST.CallStatement;
+import IC.AST.Continue;
+import IC.AST.ExpressionBlock;
+import IC.AST.Field;
+import IC.AST.Formal;
+import IC.AST.ICClass;
+import IC.AST.If;
+import IC.AST.Length;
+import IC.AST.LibraryMethod;
+import IC.AST.Literal;
+import IC.AST.LocalVariable;
+import IC.AST.LogicalBinaryOp;
+import IC.AST.LogicalUnaryOp;
+import IC.AST.MathBinaryOp;
+import IC.AST.MathUnaryOp;
+import IC.AST.Method;
+import IC.AST.NewArray;
+import IC.AST.NewClass;
+import IC.AST.PrimitiveType;
+import IC.AST.Program;
+import IC.AST.Return;
+import IC.AST.Statement;
+import IC.AST.StatementsBlock;
+import IC.AST.StaticCall;
+import IC.AST.StaticMethod;
+import IC.AST.This;
+import IC.AST.UserType;
+import IC.AST.VariableLocation;
+import IC.AST.VirtualCall;
+import IC.AST.VirtualMethod;
+import IC.AST.Visitor;
+import IC.AST.While;
+import IC.Types.Type;
+import IC.lir.Instructions.Immediate;
+import IC.lir.Instructions.Instruction;
+import IC.lir.Instructions.Label;
+import IC.lir.Instructions.MoveInstr;
+import IC.lir.Instructions.Reg;
 
 public class TranslationVisitor implements Visitor{
 	int target;
@@ -19,6 +58,9 @@ public class TranslationVisitor implements Visitor{
     
     //class layouts
     Map<ICClass, ClassLayout> classLayouts;
+    
+    //Instructions
+    List<Instruction> instructions;
     
 	// errors
     private boolean[] _hasErrors;
@@ -43,6 +85,7 @@ public class TranslationVisitor implements Visitor{
 		this.stringLiterals = new StringLiterals();
 		this.emitted = new StringBuilder();
 		_hasErrors = new boolean[4];
+		this.instructions = new ArrayList<Instruction>();
 	}
 	
 	@Override
@@ -449,18 +492,23 @@ public class TranslationVisitor implements Visitor{
 		switch(literal.getType()) {
 		case STRING:
 			emit("Move str"+stringLiterals.add((String)literal.getValue())+",R"+target); //catelog the string and emit it
+			instructions.add(new MoveInstr(new Label("str"+stringLiterals.add((String)literal.getValue())), new Reg("R"+target)));
 			break;
 		case INTEGER:
-			emit("Move "+((Integer)literal.getValue())+",R"+target);
+			//emit("Move "+((Integer)literal.getValue())+",R"+target);
+			instructions.add(new MoveInstr(new Immediate((Integer)literal.getValue()), new Reg("R"+target)));
 			break;
 		case TRUE:
-			emit("Move 1,R"+target);
+			//emit("Move 1,R"+target);
+			instructions.add(new MoveInstr(new Immediate(1), new Reg("R"+target)));
 			break;
 		case FALSE:
-			emit("Move 0,R"+target);
+			//emit("Move 0,R"+target);
+			instructions.add(new MoveInstr(new Immediate(0), new Reg("R"+target)));
 			break;
 		case NULL:
-			emit("Move 0,R"+target);
+			//emit("Move 0,R"+target);
+			instructions.add(new MoveInstr(new Immediate(0), new Reg("R"+target)));
 			break;
 		default:
 			
