@@ -51,11 +51,12 @@ import IC.lir.Instructions.CondJumpInstr;
 import IC.lir.Instructions.Immediate;
 import IC.lir.Instructions.Instruction;
 import IC.lir.Instructions.JumpInstr;
-import IC.lir.Instructions.Label;
 import IC.lir.Instructions.LabelInstr;
+import IC.lir.Instructions.Memory;
 import IC.lir.Instructions.MoveInstr;
 import IC.lir.Instructions.Operator;
 import IC.lir.Instructions.Reg;
+import IC.lir.Instructions.ReturnInstr;
 
 public class TranslationVisitor implements Visitor{
 	int target;
@@ -160,8 +161,9 @@ public class TranslationVisitor implements Visitor{
 
         // add method label
         String fullMethodName = getMethodName(_currentClass, method.getName());
-        emit(fullMethodName+":");
-
+        //emit(fullMethodName+":");
+        instructions.add(new LabelInstr(labelHandler.request(fullMethodName+":")));
+        
         // add new registers for this method
     //    _registers = new HashMap<>();
         _nextRegisterNum = 0;
@@ -169,6 +171,7 @@ public class TranslationVisitor implements Visitor{
 
         for (Formal formal : method.getFormals()) {
             formal.accept(this);
+            target++;
         }
 
         // add all statements
@@ -179,33 +182,33 @@ public class TranslationVisitor implements Visitor{
         // if in non-returning function, add a dummy return
         if (method.doesHaveFlowWithoutReturn())
             //not sure about the value 
-        	emit("Return dummy");
+        	//emit("Return dummy");
+        	instructions.add(new ReturnInstr(new Immediate(0)));
 
 		return true;
 	}
 
 	@Override
 	public Object visit(Formal formal) {
-		// TODO Auto-generated method stub
-		return null;
+		instructions.add(new MoveInstr(new Memory(formal.getName()), registers.request(target)));
+		return true;
 	}
 
 	@Override
 	public Object visit(PrimitiveType type) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Object visit(UserType type) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Object visit(Assignment assignment) {
-		// TODO Auto-generated method stub
-		return null;
+		assignment.getAssignment().accept(this);
+		instructions.add(new MoveInstr(registers.request(target), new Memory(((VariableLocation)assignment.getVariable()).getName()))); //TODO: what if variable is external?
+		return true;
 	}
 
 	@Override
@@ -216,8 +219,9 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(Return returnStatement) {
-		// TODO Auto-generated method stub
-		return null;
+		returnStatement.getValue().accept(this);
+		instructions.add(new ReturnInstr(registers.request(target)));
+		return true;
 	}
 
 	@Override
