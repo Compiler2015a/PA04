@@ -43,6 +43,7 @@ import IC.AST.VirtualMethod;
 import IC.AST.Visitor;
 import IC.AST.While;
 import IC.Types.Type;
+import IC.lir.Instructions.ArrayLengthInstr;
 import IC.lir.Instructions.BinOpInstr;
 import IC.lir.Instructions.CompareInstr;
 import IC.lir.Instructions.Cond;
@@ -328,7 +329,8 @@ public class TranslationVisitor implements Visitor{
 		target++;
 		length.getArray().accept(this);
 		target--;
-		emit("ArrayLength R"+(target+1)+",R"+target);
+		//emit("ArrayLength R"+(target+1)+",R"+target);
+		instructions.add(new ArrayLengthInstr(registers.request(target+1), registers.request(target)));
 		return null;
 	}
 
@@ -337,27 +339,34 @@ public class TranslationVisitor implements Visitor{
 		binaryOp.getFirstOperand().accept(this);
 		target++;
 		binaryOp.getSecondOperand().accept(this);
-		String instruction="";
+		//String instruction="";
+		Operator op;
 		switch(binaryOp.getOperator()) {
 		case PLUS: //TODO: what about __stringCat ?
-			instruction="Add";
+			//instruction="Add";
+			op = Operator.ADD;
 			break;
 		case MINUS:
-			instruction="Sub";
+			//instruction="Sub";
+			op = Operator.SUB;
 			break;
 		case DIVIDE:
-			instruction="Div";
+			//instruction="Div";
+			op = Operator.DIV;
 			break;
 		case MULTIPLY:
-			instruction="Mul";
+			//instruction="Mul";
+			op = Operator.MUL;
 			break;
 		case MOD:
-			instruction="Mod";
+			//instruction="Mod";
+			op = Operator.MOD;
 			break;
 		default:
-			
+			return false;
 		}
-		emit(instruction+" R"+target+",R"+(--target));
+		//emit(instruction+" R"+target+",R"+(--target));
+		instructions.add(new BinOpInstr(registers.request(target), registers.request(--target), op));
 		return true;
 	}
 
