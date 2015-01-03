@@ -43,10 +43,12 @@ import IC.AST.VirtualMethod;
 import IC.AST.Visitor;
 import IC.AST.While;
 import IC.Types.Type;
+import IC.lir.Instructions.BinOpInstr;
 import IC.lir.Instructions.Immediate;
 import IC.lir.Instructions.Instruction;
 import IC.lir.Instructions.Label;
 import IC.lir.Instructions.MoveInstr;
+import IC.lir.Instructions.Operator;
 import IC.lir.Instructions.Reg;
 
 public class TranslationVisitor implements Visitor{
@@ -72,7 +74,8 @@ public class TranslationVisitor implements Visitor{
     };
     
     // registers
-    private Map<String, Integer> _registers;
+    //private Map<String, Integer> _registers;
+    private Registers registers;
     private int _nextRegisterNum;
     //labels
     private Stack<String> _whileLabelStack;
@@ -86,6 +89,7 @@ public class TranslationVisitor implements Visitor{
 		this.emitted = new StringBuilder();
 		_hasErrors = new boolean[4];
 		this.instructions = new ArrayList<Instruction>();
+		this.registers = new Registers();
 	}
 	
 	@Override
@@ -467,7 +471,8 @@ public class TranslationVisitor implements Visitor{
 	public Object visit(MathUnaryOp unaryOp) {
 		if (unaryOp.getOperator() == UnaryOps.UMINUS) {
 			unaryOp.getOperand().accept(this);
-			emit("Mult -1,R"+target);
+			//emit("Mult -1,R"+target);
+			instructions.add(new BinOpInstr(new Immediate(-1), registers.request(target), Operator.MUL));
 			return true;
 		}
 			
@@ -480,8 +485,10 @@ public class TranslationVisitor implements Visitor{
 			target++;
 			unaryOp.getOperand().accept(this);
 			target--;
-			emit("Move 1,R"+target);
-			emit("Sub R"+(target-1)+",R"+target);
+			//emit("Move 1,R"+target);
+			//emit("Sub R"+(target+1)+",R"+target);
+			instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
+			instructions.add(new BinOpInstr(registers.request(target+1), registers.request(target), Operator.SUB));
 			return true;
 		}
 		return false;
@@ -496,19 +503,19 @@ public class TranslationVisitor implements Visitor{
 			break;
 		case INTEGER:
 			//emit("Move "+((Integer)literal.getValue())+",R"+target);
-			instructions.add(new MoveInstr(new Immediate((Integer)literal.getValue()), new Reg("R"+target)));
+			instructions.add(new MoveInstr(new Immediate((Integer)literal.getValue()), registers.request(target)));
 			break;
 		case TRUE:
 			//emit("Move 1,R"+target);
-			instructions.add(new MoveInstr(new Immediate(1), new Reg("R"+target)));
+			instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
 			break;
 		case FALSE:
 			//emit("Move 0,R"+target);
-			instructions.add(new MoveInstr(new Immediate(0), new Reg("R"+target)));
+			instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
 			break;
 		case NULL:
 			//emit("Move 0,R"+target);
-			instructions.add(new MoveInstr(new Immediate(0), new Reg("R"+target)));
+			instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
 			break;
 		default:
 			
