@@ -163,7 +163,7 @@ public class TranslationVisitor implements Visitor{
         emit(fullMethodName+":");
 
         // add new registers for this method
-        _registers = new HashMap<>();
+    //    _registers = new HashMap<>();
         _nextRegisterNum = 0;
 
 

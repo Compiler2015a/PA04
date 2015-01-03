@@ -80,6 +80,12 @@ public class TypeTableBuilder implements Visitor {
 	@Override
 	public Object visit(Program program) {
 		for (ICClass icClass : program.getClasses())
+			if (!builtTypeTable.addClassType(icClass)) {
+				semanticErrorThrower = new SemanticErrorThrower(icClass.getLine(),
+						"extended class " + icClass.getSuperClassName() + " was not declared");
+				return false;
+			}
+		for (ICClass icClass : program.getClasses())
 			if (!(Boolean)icClass.accept(this))
 				return false;
 		return true;
@@ -89,11 +95,7 @@ public class TypeTableBuilder implements Visitor {
 	public Object visit(ICClass icClass) {
 		// Checks if the class extends a class which was not 
 		// declared before (including class extending itself situation).
-		if (!builtTypeTable.addClassType(icClass)) {
-			semanticErrorThrower = new SemanticErrorThrower(icClass.getLine(),
-					"extended class " + icClass.getSuperClassName() + " was not declared");
-			return false;
-		}
+
 		for (Field field : icClass.getFields())
 			field.accept(this);
 		for (Method method : icClass.getMethods())
