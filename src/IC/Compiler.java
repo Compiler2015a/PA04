@@ -84,6 +84,9 @@ public class Compiler {
 				typeTableBuilder.getBuiltTypeTable().printTable();
 			}
 			
+			if(isInArgs(args, "-print-lir"))
+				trv.printInstructions();
+			
 		} catch (FileNotFoundException e) {
 			System.out.println(e);
 		} catch (LexicalError e) {

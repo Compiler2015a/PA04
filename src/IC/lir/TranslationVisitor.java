@@ -101,6 +101,11 @@ public class TranslationVisitor implements Visitor{
 		this.labelHandler = new Labels();
 	}
 	
+	public void printInstructions() {
+		for (Instruction inst : instructions)
+			System.out.println(inst.toString());
+	}
+	
 	@Override
 	public Object visit(Program program) {
 		for (ICClass cls : program.getClasses()) {
@@ -541,7 +546,7 @@ public class TranslationVisitor implements Visitor{
 		if (unaryOp.getOperator() == UnaryOps.UMINUS) {
 			unaryOp.getOperand().accept(this);
 			//emit("Mult -1,R"+target);
-			instructions.add(new BinOpInstr(new Immediate(-1), registers.request(target), Operator.MUL));
+			instructions.add(new BinOpInstr(new Immediate(-1), registers.request(target), Operator.SUB)); // TODO unaryOPinst?
 			return true;
 		}
 			
@@ -557,7 +562,7 @@ public class TranslationVisitor implements Visitor{
 			//emit("Move 1,R"+target);
 			//emit("Sub R"+(target+1)+",R"+target);
 			instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
-			instructions.add(new BinOpInstr(registers.request(target+1), registers.request(target), Operator.SUB));
+			instructions.add(new BinOpInstr(registers.request(target+1), registers.request(target), Operator.NEG)); // TODO unaryOPinst?
 			return true;
 		}
 		return false;
@@ -589,7 +594,7 @@ public class TranslationVisitor implements Visitor{
 		default:
 			
 		}
-		return null;
+		return null; // TODO - return null or boolean?
 	}
 
 	@Override
