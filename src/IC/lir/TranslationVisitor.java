@@ -49,33 +49,33 @@ public class TranslationVisitor implements Visitor{
 	int target;
 	StringLiterals stringLiterals;
 	StringBuilder emitted;
-    String _currentClass;
-    
-    //class layouts
-    Map<ICClass, ClassLayout> classLayouts;
-    Map<String, ICClass> classes;
-    
-    //Instructions
-    List<Instruction> instructions;
-    
+	String _currentClass;
+
+	//class layouts
+	Map<ICClass, ClassLayout> classLayouts;
+	Map<String, ICClass> classes;
+
+	//Instructions
+	List<Instruction> instructions;
+
 	// errors
-    private boolean[] _hasErrors;
-    private final String[] _errorStrings = {
-            "Runtime error: Null pointer dereference!",
-            "Runtime error: Array index out of bounds!",
-            "Runtime error: Array allocation with negative array size!",
-            "Runtime error: Division by zero!"
-    };
-    
-    // registers
-    //private Map<String, Integer> _registers;
-    private Registers registers;
-    private int _nextRegisterNum;
-    //labels
-    private Labels labelHandler;
-    private Stack<String> _whileLabelStack;
-    private Stack<String> _endWhileLabelStack;
-	
+	private boolean[] _hasErrors;
+	private final String[] _errorStrings = {
+			"Runtime error: Null pointer dereference!",
+			"Runtime error: Array index out of bounds!",
+			"Runtime error: Array allocation with negative array size!",
+			"Runtime error: Division by zero!"
+	};
+
+	// registers
+	//private Map<String, Integer> _registers;
+	private Registers registers;
+	private int _nextRegisterNum;
+	//labels
+	private Labels labelHandler;
+	private Stack<String> _whileLabelStack;
+	private Stack<String> _endWhileLabelStack;
+
 	public TranslationVisitor() {
 		this.target = 0;
 		this.classLayouts = new HashMap<ICClass,ClassLayout>();
@@ -85,16 +85,16 @@ public class TranslationVisitor implements Visitor{
 		this.instructions = new ArrayList<Instruction>();
 		this.registers = new Registers();
 		this.labelHandler = new Labels();
-		
+
 		this._whileLabelStack = new Stack<String>();
 		this._endWhileLabelStack = new Stack<String>();
 	}
-	
+
 	public void printInstructions() {
 		for (Instruction inst : instructions)
 			System.out.println(inst.toString());
 	}
-	
+
 	@Override
 	public Object visit(Program program) {
 		for (ICClass cls : program.getClasses()) {
@@ -107,19 +107,19 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(ICClass icClass) {
 		ClassLayout cl = new ClassLayout();
-		
+
 		classes.put(icClass.getName(), icClass);
-		
+
 		for (Field field : icClass.getFields()) {
 			field.accept(this);
 			cl.addField(field);
 		}
-		
+
 		for (Method method : icClass.getMethods()) {
 			method.accept(this);
 			cl.addMethod(method);
 		}
-		
+
 		classLayouts.put(icClass, cl);
 		return null;
 	}
@@ -147,36 +147,36 @@ public class TranslationVisitor implements Visitor{
 		//System.out.println("4");
 		return null;
 	}
-	
+
 	private Object visitMethod(Method method)
 	{
 		int startLine = target;
 
-        // add method label
-        String fullMethodName = getMethodName(_currentClass, method.getName());
-        //emit(fullMethodName+":");
-        instructions.add(new LabelInstr(labelHandler.requestStr(fullMethodName+":")));
-        
-        // add new registers for this method
-    //    _registers = new HashMap<>();
-        _nextRegisterNum = 0;
+		// add method label
+		String fullMethodName = getMethodName(_currentClass, method.getName());
+		//emit(fullMethodName+":");
+		instructions.add(new LabelInstr(labelHandler.requestStr(fullMethodName+":")));
+
+		// add new registers for this method
+		//    _registers = new HashMap<>();
+		_nextRegisterNum = 0;
 
 
-        for (Formal formal : method.getFormals()) {
-            formal.accept(this);
-            target++;
-        }
+		for (Formal formal : method.getFormals()) {
+			formal.accept(this);
+			target++;
+		}
 
-        // add all statements
-        for (Statement stmt : method.getStatements()) {
-            stmt.accept(this);
-        }
+		// add all statements
+		for (Statement stmt : method.getStatements()) {
+			stmt.accept(this);
+		}
 
-        // if in non-returning function, add a dummy return
-        if (method.doesHaveFlowWithoutReturn())
-            //not sure about the value 
-        	//emit("Return dummy");
-        	instructions.add(new ReturnInstr(new Reg("Rdummy")));
+		// if in non-returning function, add a dummy return
+		if (method.doesHaveFlowWithoutReturn())
+			//not sure about the value 
+			//emit("Return dummy");
+			instructions.add(new ReturnInstr(new Reg("Rdummy")));
 
 		return null;
 	}
@@ -234,7 +234,7 @@ public class TranslationVisitor implements Visitor{
 			ifStatement.getElseOperation().accept(this);
 		}
 		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, ifLabel)));
-		
+
 		return null;
 	}
 
@@ -246,7 +246,7 @@ public class TranslationVisitor implements Visitor{
 		whileStatement.getCondition().accept(this);
 		instructions.add(new CompareInstr(new Immediate(1), registers.request(target)));
 		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, whileLabel), Cond.False));
-		
+
 		this._whileLabelStack.add(CommonLabels.TEST_LABEL.toString()+whileLabel);
 		this._endWhileLabelStack.add(CommonLabels.END_LABEL.toString()+whileLabel);
 		whileStatement.getOperation().accept(this);
@@ -304,7 +304,7 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(StaticCall call) {
-	/*	List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
+		/*	List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
 		for (Expression arg : call.getArguments()) {
 			arg.accept(this);
 			target++;
@@ -312,7 +312,7 @@ public class TranslationVisitor implements Visitor{
 		instructions.add(new IC.lir.Instructions.StaticCall(
 				labelHandler.requestStr(getMethodName(call.getClassName(), call.getName()),
 				,registers.request(target))))
-				*/
+		 */
 		return null;
 	}
 
@@ -333,7 +333,7 @@ public class TranslationVisitor implements Visitor{
 		List<Operand> args = new ArrayList<Operand>();
 		args.add(new Immediate(classLayouts.get(classes.get(newClass.getName())).getAllocatedSize()));
 		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateObject"), args , registers.request(target)));
-		
+
 		instructions.add(new MoveFieldInstr(registers.request(target), new Immediate(0), labelHandler.requestStr("_DV_"+newClass.getName()), false));
 		return null;
 	}
@@ -362,10 +362,18 @@ public class TranslationVisitor implements Visitor{
 		//String instruction="";
 		Operator op;
 		switch(binaryOp.getOperator()) {
-		case PLUS: //TODO: what about __stringCat ?
-			//instruction="Add";
-			op = Operator.ADD;
-			break;
+		case PLUS:
+			if(binaryOp.getFirstOperand().getEntryType().isStringType() && binaryOp.getSecondOperand().getEntryType().isStringType()){
+				List<Operand> args = new ArrayList<Operand>();
+				args.add(registers.request(target));
+				args.add(registers.request(target+1));
+				instructions.add(new LibraryCall(labelHandler.requestStr("__stringCat"), args, registers.request(target)));
+				return true;
+			} else {
+				//instruction="Add";
+				op = Operator.ADD;
+				break;
+			}
 		case MINUS:
 			//instruction="Sub";
 			op = Operator.SUB;
@@ -383,17 +391,17 @@ public class TranslationVisitor implements Visitor{
 			op = Operator.MOD;
 			break;
 		default:
-			return null;
+			return false;
 		}
 		//emit(instruction+" R"+target+",R"+(--target));
 		instructions.add(new BinOpInstr(registers.request(target), registers.request(--target), op));
 
-		return null;
+		return true;
 	}
 
 	@Override
 	public Object visit(LogicalBinaryOp binaryOp) {
-		
+
 		//target++;
 		//binaryOp.getSecondOperand().accept(this);
 		labelHandler.increaseLabelsCounter();
@@ -536,9 +544,9 @@ public class TranslationVisitor implements Visitor{
 			instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
 			break;
 		default:
-			
+
 		}
-		
+
 		return null;
 	}
 
@@ -585,7 +593,7 @@ public class TranslationVisitor implements Visitor{
 			instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
 			break;
 		default:
-			
+
 		}
 
 		return null; 
@@ -597,24 +605,24 @@ public class TranslationVisitor implements Visitor{
 
 		return null;
 	}
-	
+
 	public void emit(String s) {
 		emitted.append(s+"\n");
 	}
-	
-    private String getMethodName(String className, String name) {
-        if (name.equals("main"))
-            return "_ic_main";
 
-        if (className.equals("Library"))
-            return name;
+	private String getMethodName(String className, String name) {
+		if (name.equals("main"))
+			return "_ic_main";
 
-        return "_" + className + "_" + name;
-    }
-    
-    public String getEmissionString()
-    {
-    	return this.emitted.toString();
-    }
+		if (className.equals("Library"))
+			return name;
+
+		return "_" + className + "_" + name;
+	}
+
+	public String getEmissionString()
+	{
+		return this.emitted.toString();
+	}
 
 }
