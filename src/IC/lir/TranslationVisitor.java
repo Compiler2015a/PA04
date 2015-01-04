@@ -340,8 +340,12 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(NewArray newArray) {
-		// TODO Auto-generated method stub
-		return null;
+		List<Operand> args = new ArrayList<Operand>();
+		target++;
+		newArray.getSize().accept(this); //TODO: What kind of Expression is size in an array? are we handling it correctly?
+		args.add(registers.request(target--));
+		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateArray"), args, registers.request(target)));
+		return true;
 	}
 
 	@Override
