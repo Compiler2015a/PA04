@@ -1,0 +1,17 @@
+str1: "a"
+str0: ""
+str2: "b"
+
+_DV_Library: []
+_DV_Test: []
+
+_ic_main:
+StaticCall _Test_test(),Rdummy
+Library __exit(0),R0
+Return 9999
+
+        ####Function: test####
+_Test_test:
+Move str0,R0
+Library __println(R0),Rdummy
+Return 9999

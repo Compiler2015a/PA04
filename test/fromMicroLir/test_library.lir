@@ -1,0 +1,35 @@
+str1: "hello world"
+str2: "enter a number:"
+str3: "enter a text string:"
+str4: "enter a key:"
+str5: "here is the time in milliseconds since the program started:"
+
+_ic_main:
+
+# Test stoa and atos
+Library __stoa(str1),R1
+Library __atos(R1),R2
+Library __println(R2),Rdummy
+
+# Test readln and stoi
+Library __print(str3),Rdummy
+Library __readln(),R1
+Library __println(R1),Rdummy
+
+# Test readln and stoi
+Library __print(str2),Rdummy
+Library __readln(),R1
+Library __stoi(R1),R1
+Library __printi(R1),Rdummy
+
+# Test readi and printi
+Library __print(str4),Rdummy
+Library __readi(),R1
+Library __printi(R1),Rdummy
+
+# Test time
+Library __time(),R1
+Library __print(str5),Rdummy
+Library __printi(R1),Rdummy
+
+Library __exit(0),Rdummy

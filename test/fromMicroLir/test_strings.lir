@@ -1,0 +1,9 @@
+# A program to test the use of string literals
+str1: "Hello World! "
+str2: "My name is Inigo Montoya"
+
+_ic_main:
+Library __println(str1),R1
+Library __println(str2),R2
+Library __stringCat(str1,str2),R3
+Library __println(R3),R4

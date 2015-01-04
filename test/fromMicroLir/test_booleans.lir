@@ -1,0 +1,8 @@
+# A program to test Boolean instructions
+str1: " "
+
+_ic_main:
+  Move 0,R1
+  Library __printb(R1),Rdummy
+  Xor 1,R1
+  Library __printb(R1),Rdummy

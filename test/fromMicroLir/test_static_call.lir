@@ -1,0 +1,24 @@
+# A program to test static function calls
+str1: "In _func1"
+str2: "Before call to _func"
+str3: "After call to _func"
+
+# func1 has the signature int func1(int x,int y)
+_func1:
+Library __printi(x),Rdummy
+Library __printi(y),Rdummy
+Library __println(str1),Rdummy
+Move 4,R1
+Library __printi(R1),Rdummy
+Move 7,R5
+Return R5
+
+_ic_main:
+Move 3,R1
+Move 5,R2
+Library __println(str2),Rdummy
+Library __printi(R1),Rdummy
+StaticCall _func1(x=R1,y=R2),R8
+Library __printi(R8),Rdummy
+Library __println(str3),Rdummy
+Library __printi(R1),Rdummy

@@ -1,0 +1,25 @@
+# Example program from T9 for the following program:
+# x = 42;
+# while (x > 0) {
+# 	x = x - 1;
+# }
+str1: "x="
+str2: ""
+
+_ic_main:
+Move 42,R1
+Move R1,x
+_test_label:
+Move x,R1
+Compare 0,R1
+JumpLE _end_label 
+Move x,R1
+Move 1,R2
+Sub R2,R1
+Move R1,x
+# Extra code to print "x="+x
+Library __print(str1),Rdummy
+Library __printi(R1),Rdummy
+Library __println(str2),Rdummy
+Jump _test_label
+_end_label:

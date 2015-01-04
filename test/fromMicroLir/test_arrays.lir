@@ -1,0 +1,39 @@
+# A program to test array manipulation instructions
+str1: " "
+
+_ic_main:
+  # Allocate an array for 10 integers
+  Library __allocateArray(40),R1 # 4 * 10
+  # Now print the elements of the array (should be zero)
+  Move 0,R2
+_l1:
+  Compare 10,R2
+  JumpGE _e1
+  MoveArray R1[R2],R3
+  Library __printi(R3),Rdummy
+  Inc R2
+  Jump _l1
+_e1:
+  Library __println(str1),Rdummy
+
+  # Now fill the array with 0,1,2,3,4,5,6,7,8,9
+  Move 0,R2
+_l2:
+  Compare 10,R2
+  JumpGE _e2
+  MoveArray R2,R1[R2]
+  Inc R2
+  Jump _l2
+_e2:
+
+  # Print the updated elements of the array
+  Move 0,R2
+_l3:
+  Compare 10,R2
+  JumpGE _e3
+  MoveArray R1[R2],R3
+  Library __printi(R3),Rdummy
+  Inc R2
+  Jump _l3
+_e3:
+  Library __println(str1),Rdummy

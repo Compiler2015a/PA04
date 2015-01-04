@@ -1,0 +1,13 @@
+# A program to test object allocation and field manipulation instructions
+_ic_main:
+Library __allocateObject(12),R1
+MoveField 0,R1.0
+MoveField 1,R1.1
+MoveField 2,R1.2
+
+MoveField R1.0,R2
+Library __printi(R2),Rdummy
+MoveField R1.1,R2
+Library __printi(R2),Rdummy
+MoveField R1.2,R2
+Library __printi(R2),Rdummy

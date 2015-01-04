@@ -1,0 +1,7 @@
+# A program to test returning Rdummy
+
+_func1:
+Return Rdummy
+
+_ic_main:
+StaticCall _func1(),Rdummy

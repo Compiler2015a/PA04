@@ -287,13 +287,20 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(LocalVariable localVariable) {
-		// TODO Auto-generated method stub
+		if (localVariable.hasInitValue()) {
+			localVariable.getInitValue().accept(this);
+			instructions.add(new MoveInstr(registers.request(target), new Memory(localVariable.getName())));
+		}
+		// TODO what if there isn't an init value???
 		return null;
 	}
 
 	@Override
 	public Object visit(VariableLocation location) {
-		// TODO Auto-generated method stub
+		if (location.isExternal()) {
+			// TODO ???
+		}
+		instructions.add(new MoveInstr(new Memory(location.getName()), registers.request(target)));
 		return null;
 	}
 

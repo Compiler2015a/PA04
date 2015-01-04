@@ -1,0 +1,53 @@
+# An example with conditions:
+# x = 9;
+# y = 6;
+# z = 8;
+# if (x < y || x > z)
+#    Library.println("x < y || x > z is true");
+# else
+#   Library.println("x < y || x > z is false");
+
+str1: "x < y || x > z is true"
+str2: "x < y || x > z is false"
+
+_ic_main:
+Move 9,x
+Move 6,y
+Move 8,z
+
+# Check if x<y holds and store result in R0
+Move 0,R0
+Move x,R1
+Move y,R2
+Compare R1,R2
+JumpLE _l1 # Jump to avoid storing 1 in R0, leaving its previously value - 0
+Move 1,R0
+_l1:
+
+# Now R0 is 1 iff x<y
+Compare 0,R0
+JumpFalse _then_label
+
+# Now check if x>z holds and store result in R0
+Move 0,R0
+Move x,R1
+Move z,R2
+Compare R1,R2
+JumpGE _l2 # Jump to avoid storing 1 in R0, leaving its previously value - 0
+Move 1,R0
+_l2:
+
+# Now R0 is 1 iff x>z
+Compare 0,R0
+JumpFalse _then_label
+# If we are here then the condition of the if doesn't hold so jump to the else part
+Jump _else_label
+
+_then_label:
+Library __println(str1),Rdummy
+Jump _end
+
+_else_label:
+Library __println(str2),Rdummy
+
+_end:
