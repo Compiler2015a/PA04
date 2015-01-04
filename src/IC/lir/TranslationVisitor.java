@@ -79,7 +79,7 @@ public class TranslationVisitor implements Visitor{
 	public TranslationVisitor() {
 		this.target = 0;
 		this.classLayouts = new HashMap<ICClass,ClassLayout>();
-		this.stringLiterals = new StringLiterals(); //TODO there is also a StringLiteral class in the Instructions package. Replace?? (Answer: no, I fixed it to use that class, it's OK)
+		this.stringLiterals = new StringLiterals(); //there is also a StringLiteral class in the Instructions package. Replace?? (Answer: no, I fixed it to use that class, it's OK)
 		this.emitted = new StringBuilder();
 		_hasErrors = new boolean[4];
 		this.instructions = new ArrayList<Instruction>();
@@ -91,6 +91,16 @@ public class TranslationVisitor implements Visitor{
 	}
 
 	public void printInstructions() {
+		//print string literals
+		for(StringLiteral sl : stringLiterals.toStringLiteralList())
+			System.out.println(sl.toString());
+		
+		//print dispatch tables
+		for(ClassLayout cl : classLayouts.values()) {
+			System.out.println(cl);
+		}
+		
+		//print instructions
 		for (Instruction inst : instructions)
 			System.out.println(inst.toString());
 	}
@@ -106,7 +116,7 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(ICClass icClass) {
-		ClassLayout cl = new ClassLayout();
+		ClassLayout cl = new ClassLayout(icClass.getName());
 
 		classes.put(icClass.getName(), icClass);
 

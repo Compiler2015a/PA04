@@ -31,7 +31,7 @@ public class StringLiterals {
 	/**
 	 * @return all strings literals in a form of a list of string literals.
 	 */
-	public List<StringLiteral> toLabelInstructions() {
+	public List<StringLiteral> toStringLiteralList() {
 		return sLiterals;
 	}
 	

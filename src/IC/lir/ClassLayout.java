@@ -7,11 +7,13 @@ import IC.AST.Field;
 import IC.AST.Method;
 
 public class ClassLayout {
+	String className;
 	Map<Method, Integer> methodToOffset;
 	//DVPtr = 0;
 	Map<Field, Integer> fieldToOffset;
 
-	public ClassLayout() {
+	public ClassLayout(String className) {
+		this.className = className;
 		methodToOffset = new HashMap<Method, Integer>();
 		fieldToOffset = new HashMap<Field, Integer>();
 	}
@@ -46,9 +48,26 @@ public class ClassLayout {
 		return (4*fieldToOffset.size()+4); //4 bytes (32 bits) per field, + 4 bytes for DVPtr
 	}
 	
+	
 	@Override
 	public String toString() {
-		//TODO: DO THIS
-		return null;
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("_DV_"+className+": [");
+		
+		//sort methods according to their offsets
+		Method[] arr = new Method[methodToOffset.size()];
+		for(Method m: methodToOffset.keySet())
+			arr[methodToOffset.get(m)]=m;
+		
+		for(int i=0;i<arr.length;i++) {
+			sb.append("_"+className+"_"+arr[i].getName());
+			if(i<arr.length-1)
+				sb.append(",");
+		}
+		
+		sb.append("]");
+		
+		return sb.toString();
 	}
 }
