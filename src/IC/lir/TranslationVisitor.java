@@ -578,8 +578,8 @@ public class TranslationVisitor implements Visitor{
 	public Object visit(Literal literal) {
 		switch(literal.getType()) {
 		case STRING:
-			emit("Move str"+stringLiterals.add((String)literal.getValue())+",R"+target); //catelog the string and emit it
-			instructions.add(new MoveInstr(labelHandler.request("str"+stringLiterals.add((String)literal.getValue())), new Reg("R"+target)));
+			//emit("Move str"+stringLiterals.add((String)literal.getValue())+",R"+target); //catelog the string and emit it
+			instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add((String)literal.getValue())), registers.request(target)));
 			break;
 		case INTEGER:
 			//emit("Move "+((Integer)literal.getValue())+",R"+target);
