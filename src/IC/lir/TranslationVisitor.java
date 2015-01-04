@@ -99,6 +99,9 @@ public class TranslationVisitor implements Visitor{
 		this.instructions = new ArrayList<Instruction>();
 		this.registers = new Registers();
 		this.labelHandler = new Labels();
+		
+		this._whileLabelStack = new Stack<String>();
+		this._endWhileLabelStack = new Stack<String>();
 	}
 	
 	public void printInstructions() {
@@ -232,49 +235,51 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(If ifStatement) {
 		//System.out.println("bla "+ifStatement.getCondition()+"\n");
-		if (!(Boolean)ifStatement.getCondition().accept(this))
-			return false;
-		Type typeCondition = ifStatement.getCondition().getEntryType();
-		emit("R"+target+" := "+ typeCondition);
-		emit("Compare 0,R"+target);
+		ifStatement.getCondition().accept(this);
+		labels++;
+		int ifLabel = labels;
+		instructions.add(new CompareInstr(new Immediate(1), registers.request(target)));
+		String jumpingLabel = ifStatement.hasElse() ? "_false_label" : "_end_label";
+		instructions.add(new CondJumpInstr(labelHandler.request(jumpingLabel+ifLabel), Cond.False));
+		ifStatement.getOperation().accept(this);
+		if (ifStatement.hasElse()) {
+			instructions.add(new JumpInstr(labelHandler.request("_end_label"+ifLabel)));
+			instructions.add(new LabelInstr(labelHandler.request("_false_label"+ifLabel)));
+			ifStatement.getElseOperation().accept(this);
+		}
+		instructions.add(new LabelInstr(labelHandler.request("_end_label"+ifLabel)));
 		
-		String endIfLabel="_end_label"+labels++;
-		if (ifStatement.hasElse()) 
-		{
-			String elseLabel ="_false_label"+labels++;
-			emit("JumpTrue "+elseLabel);
-			// print "then"
-	        ifStatement.getOperation().accept(this);
-	        emit("Jump "+endIfLabel);
-	        emit(elseLabel+":");
-	        // print else
-		}
-		else
-		{
-			emit("JumpTrue "+endIfLabel);
-			// print "then"
-	        ifStatement.getOperation().accept(this);
-		}
-		// end-if
-		emit(endIfLabel+":");
 		return true;
 	}
 
 	@Override
 	public Object visit(While whileStatement) {
-		// TODO Auto-generated method stub
+		labels++;
+		int whileLabel = labels;
+		instructions.add(new LabelInstr(labelHandler.request("_test_label"+whileLabel)));
+		whileStatement.getCondition().accept(this);
+		instructions.add(new CompareInstr(new Immediate(1), registers.request(target)));
+		instructions.add(new CondJumpInstr(labelHandler.request("_end_label"+whileLabel), Cond.False));
+		
+		this._whileLabelStack.add("_test_label"+whileLabel);
+		this._endWhileLabelStack.add("_end_label"+whileLabel);
+		whileStatement.getOperation().accept(this);
+		this._whileLabelStack.pop();
+		this._endWhileLabelStack.pop();
+		instructions.add(new JumpInstr(labelHandler.request("_test_label"+whileLabel)));
+		instructions.add(new LabelInstr(labelHandler.request("_end_label"+whileLabel)));
 		return null;
 	}
 
 	@Override
 	public Object visit(Break breakStatement) {
-		// TODO Auto-generated method stub
+		instructions.add(new JumpInstr(labelHandler.request(this._endWhileLabelStack.lastElement())));
 		return null;
 	}
 
 	@Override
 	public Object visit(Continue continueStatement) {
-		// TODO Auto-generated method stub
+		instructions.add(new JumpInstr(labelHandler.request(this._whileLabelStack.lastElement())));
 		return null;
 	}
 
@@ -391,7 +396,7 @@ public class TranslationVisitor implements Visitor{
 		
 		//target++;
 		//binaryOp.getSecondOperand().accept(this);
-		
+		labels++;
 		switch(binaryOp.getOperator()) {
 		case GT:
 			binaryOp.getSecondOperand().accept(this);
@@ -411,7 +416,6 @@ public class TranslationVisitor implements Visitor{
 			instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
 			//emit("_end_label"+labels);
 			instructions.add(new LabelInstr(labelHandler.request("_end_label"+labels)));
-			labels++;
 			break;
 		case GTE:
 			binaryOp.getSecondOperand().accept(this);
@@ -431,7 +435,6 @@ public class TranslationVisitor implements Visitor{
 			instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
 			//emit("_end_label"+labels);
 			instructions.add(new LabelInstr(labelHandler.request("_end_label"+labels)));
-			labels++;
 			break;
 		case EQUAL:
 			binaryOp.getSecondOperand().accept(this);
@@ -451,7 +454,6 @@ public class TranslationVisitor implements Visitor{
 			instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
 			//emit("_end_label"+labels);
 			instructions.add(new LabelInstr(labelHandler.request("_end_label"+labels)));
-			labels++;
 			break;
 		case NEQUAL:
 			binaryOp.getSecondOperand().accept(this);
@@ -471,7 +473,6 @@ public class TranslationVisitor implements Visitor{
 			instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
 			//emit("_end_label"+labels);
 			instructions.add(new LabelInstr(labelHandler.request("_end_label"+labels)));
-			labels++;
 			break;
 		case LT:
 			binaryOp.getSecondOperand().accept(this);
@@ -491,7 +492,6 @@ public class TranslationVisitor implements Visitor{
 			instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
 			//emit("_end_label"+labels);
 			instructions.add(new LabelInstr(labelHandler.request("_end_label"+labels)));
-			labels++;
 			break;
 		case LTE:
 			binaryOp.getSecondOperand().accept(this);
@@ -511,7 +511,6 @@ public class TranslationVisitor implements Visitor{
 			instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
 			//emit("_end_label"+labels);
 			instructions.add(new LabelInstr(labelHandler.request("_end_label"+labels)));
-			labels++;
 			break;
 		case LAND:
 			binaryOp.getFirstOperand().accept(this);
@@ -524,7 +523,6 @@ public class TranslationVisitor implements Visitor{
 			//emit("And R"+target+",R"+(--target));
 			//emit("_end_label"+labels);
 			instructions.add(new BinOpInstr(registers.request(target), registers.request(--target), Operator.AND));
-			labels++;
 			break;
 		case LOR:
 			binaryOp.getFirstOperand().accept(this);
@@ -538,7 +536,6 @@ public class TranslationVisitor implements Visitor{
 			//emit("_end_label"+labels);
 			instructions.add(new BinOpInstr(registers.request(target), registers.request(--target), Operator.OR));
 			instructions.add(new LabelInstr(labelHandler.request("_end_label"+labels)));
-			labels++;
 			break;
 		default:
 			
