@@ -2,11 +2,13 @@ package IC.lir;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Stack;
 
-import IC.UnaryOps;
+import IC.AST.ASTNode;
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
 import IC.AST.Break;
@@ -49,10 +51,10 @@ public class TranslationVisitor implements Visitor{
 	int target;
 	StringLiterals stringLiterals;
 	StringBuilder emitted;
-	String _currentClass;
+
 
 	//class layouts
-	Map<ICClass, ClassLayout> classLayouts;
+	Map<String, ClassLayout> classLayouts;
 	Map<String, ICClass> classes;
 
 	//Instructions
@@ -66,7 +68,8 @@ public class TranslationVisitor implements Visitor{
 			"Runtime error: Array allocation with negative array size!",
 			"Runtime error: Division by zero!"
 	};
-
+	
+	private Queue<ASTNode> nodeHandlingQueue;
 	// registers
 	//private Map<String, Integer> _registers;
 	private Registers registers;
@@ -75,10 +78,11 @@ public class TranslationVisitor implements Visitor{
 	private Labels labelHandler;
 	private Stack<String> _whileLabelStack;
 	private Stack<String> _endWhileLabelStack;
-
+	
+	private Map<String, List<String>> methodFullNamesMap;
+	
 	public TranslationVisitor() {
-		this.target = 0;
-		this.classLayouts = new HashMap<ICClass,ClassLayout>();
+		this.classLayouts = new HashMap<String,ClassLayout>();
 		this.stringLiterals = new StringLiterals(); //there is also a StringLiteral class in the Instructions package. Replace?? (Answer: no, I fixed it to use that class, it's OK)
 		this.emitted = new StringBuilder();
 		_hasErrors = new boolean[4];
@@ -88,6 +92,10 @@ public class TranslationVisitor implements Visitor{
 
 		this._whileLabelStack = new Stack<String>();
 		this._endWhileLabelStack = new Stack<String>();
+		
+		this.methodFullNamesMap = new HashMap<String, List<String>>();
+		this.classes = new HashMap<String, ICClass>();
+		this.nodeHandlingQueue = new LinkedList<ASTNode>();
 	}
 
 	public void printInstructions() {
@@ -105,32 +113,46 @@ public class TranslationVisitor implements Visitor{
 			System.out.println(inst.toString());
 	}
 
+	public void translate(Program root)  {
+		nodeHandlingQueue.add(root);
+		ASTNode currentNode;
+		while (!nodeHandlingQueue.isEmpty()) { 
+			// BFS queue scan. The queue allows to scan all the classes, then all the fields and then all the methods.
+			// The statements inside a method will be scanned "deeply" (DFS) and will not be added to the queue.
+			currentNode = nodeHandlingQueue.poll();
+			currentNode.accept(this);
+		}
+	}
+	
 	@Override
 	public Object visit(Program program) {
-		for (ICClass cls : program.getClasses()) {
-			_currentClass = cls.getName();
-			cls.accept(this);
-		}
+		for (ICClass iccls : program.getClasses()) 
+			nodeHandlingQueue.add(iccls);
+		
 		return null;
 	}
 
 	@Override
 	public Object visit(ICClass icClass) {
 		ClassLayout cl = new ClassLayout(icClass.getName());
-
+		if (icClass.hasSuperClass())
+			cl.setSuperClass(classLayouts.get(icClass.getSuperClassName()));
 		classes.put(icClass.getName(), icClass);
 
 		for (Field field : icClass.getFields()) {
 			field.accept(this);
 			cl.addField(field);
 		}
-
+		
 		for (Method method : icClass.getMethods()) {
-			method.accept(this);
+			nodeHandlingQueue.add(method);
+			String methodFullName = getMethodName(icClass.getName(), method.getName());
+			method.setMethodFullName(methodFullName);
+			this.methodFullNamesMap.put(methodFullName, generatMethodParamsList(method));
 			cl.addMethod(method);
 		}
 
-		classLayouts.put(icClass, cl);
+		classLayouts.put(icClass.getName(), cl);
 		return null;
 	}
 
@@ -161,22 +183,21 @@ public class TranslationVisitor implements Visitor{
 	private Object visitMethod(Method method)
 	{
 		int startLine = target;
-
+		this.target = 1;
 		// add method label
-		String fullMethodName = getMethodName(_currentClass, method.getName());
+		String methodFullName = method.getMethodFullName();
 		//emit(fullMethodName+":");
-		instructions.add(new LabelInstr(labelHandler.requestStr(fullMethodName+":")));
-
+		instructions.add(new LabelInstr(labelHandler.requestStr(methodFullName+":")));
+		
 		// add new registers for this method
 		//    _registers = new HashMap<>();
 		_nextRegisterNum = 0;
-
 
 		for (Formal formal : method.getFormals()) {
 			formal.accept(this);
 			target++;
 		}
-
+		
 		// add all statements
 		for (Statement stmt : method.getStatements()) {
 			stmt.accept(this);
@@ -186,7 +207,7 @@ public class TranslationVisitor implements Visitor{
 		if (method.doesHaveFlowWithoutReturn())
 			//not sure about the value 
 			//emit("Return dummy");
-			instructions.add(new ReturnInstr(new Reg("Rdummy")));
+			instructions.add(new ReturnInstr(registers.request(-1)));
 
 		return null;
 	}
@@ -216,7 +237,7 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(CallStatement callStatement) {
-		// TODO Auto-generated method stub
+		callStatement.getCall().accept(this);
 		return null;
 	}
 
@@ -314,15 +335,22 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(StaticCall call) {
-		/*	List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
+		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
+		String staticCallMethodFullName = getMethodName(call.getClassName(), call.getName());
+		List<String> methodParams = this.methodFullNamesMap.get(staticCallMethodFullName);
+		int i = 0;
 		for (Expression arg : call.getArguments()) {
 			arg.accept(this);
+			paramOpRegs.add(new ParamOpPair(new Memory(methodParams.get(i)), registers.request(target)));
+			i++;
 			target++;
 		}
+		
+
 		instructions.add(new IC.lir.Instructions.StaticCall(
-				labelHandler.requestStr(getMethodName(call.getClassName(), call.getName()),
-				,registers.request(target))))
-		 */
+				labelHandler.requestStr(staticCallMethodFullName), paramOpRegs, 
+				registers.request(-1)));
+		 
 		return null;
 	}
 
@@ -341,7 +369,7 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(NewClass newClass) {
 		List<Operand> args = new ArrayList<Operand>();
-		args.add(new Immediate(classLayouts.get(classes.get(newClass.getName())).getAllocatedSize()));
+		args.add(new Immediate(classLayouts.get(newClass.getName()).getAllocatedSize()));
 		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateObject"), args , registers.request(target)));
 
 		instructions.add(new MoveFieldInstr(registers.request(target), new Immediate(0), labelHandler.requestStr("_DV_"+newClass.getName()), false));
@@ -638,5 +666,12 @@ public class TranslationVisitor implements Visitor{
 	{
 		return this.emitted.toString();
 	}
-
+	
+	private List<String> generatMethodParamsList(Method method) {
+		List<String> output = new ArrayList<String>();
+		for (Formal formal : method.getFormals()) 
+			output.add(formal.getName());
+		return output;
+	}
+	
 }

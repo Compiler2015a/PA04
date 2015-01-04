@@ -8,12 +8,14 @@ import IC.AST.Method;
 
 public class ClassLayout {
 	String className;
+	ClassLayout superClass;
 	Map<Method, Integer> methodToOffset;
 	//DVPtr = 0;
 	Map<Field, Integer> fieldToOffset;
 
 	public ClassLayout(String className) {
 		this.className = className;
+		this.superClass = null;
 		methodToOffset = new HashMap<Method, Integer>();
 		fieldToOffset = new HashMap<Field, Integer>();
 	}
@@ -45,7 +47,10 @@ public class ClassLayout {
 	 * @return size in bytes needed to allocate this class
 	 */
 	int getAllocatedSize() {
-		return (4*fieldToOffset.size()+4); //4 bytes (32 bits) per field, + 4 bytes for DVPtr
+		int allocatedSize = 4*fieldToOffset.size()+4;
+		if (this.hasSuperClass())
+			allocatedSize += superClass.getAllocatedSize() - 4; //  only fields without super class DVPtr
+		return (allocatedSize); //4 bytes (32 bits) per field, + 4 bytes for DVPtr
 	}
 	
 	
@@ -69,5 +74,13 @@ public class ClassLayout {
 		sb.append("]");
 		
 		return sb.toString();
+	}
+
+	public void setSuperClass(ClassLayout superClass) {
+		this.superClass = superClass;
+	}
+	
+	public boolean hasSuperClass() {
+		return (superClass != null);
 	}
 }

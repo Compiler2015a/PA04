@@ -7,6 +7,10 @@ import java.util.List;
  * 
  * @author Tovi Almozlino
  */
+/**
+ * @author modi
+ *
+ */
 public abstract class Method extends ASTNode {
 
 	protected Type type;
@@ -18,6 +22,8 @@ public abstract class Method extends ASTNode {
 	protected List<Statement> statements;
 
     private boolean hasFlowWithoutReturn;
+    
+    private String methodFullName;
     
 	/**
 	 * Constructs a new method node. Used by subclasses.
@@ -63,4 +69,12 @@ public abstract class Method extends ASTNode {
     public boolean doesHaveFlowWithoutReturn() {
         return this.hasFlowWithoutReturn;
     }
+
+	public String getMethodFullName() {
+		return methodFullName;
+	}
+
+	public void setMethodFullName(String methodFullName) {
+		this.methodFullName = methodFullName;
+	}
 }

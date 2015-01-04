@@ -1,6 +1,16 @@
 class A {
 	static void main(string[] args) { 
+		A a = new C();
+
 	}
-	
-	int foo(int x, int y) { return x; }
+	int x;
+	int y;
+}
+
+class B extends A {
+	int a,b,z;
+}
+
+class C extends B {
+	int c;
 }

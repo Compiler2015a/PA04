@@ -10,6 +10,7 @@ public class Registers {
 	
 	public Registers() {
 		this.regs = new HashMap<Integer,Reg>();
+		regs.put(-1,new Reg("Rdummy"));
 	}
 	
 	/**
