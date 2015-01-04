@@ -324,8 +324,8 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(This thisExpression) {
-		// TODO Auto-generated method stub
-		return null;
+		instructions.add(new MoveInstr(new Memory("this"), registers.request(target)));
+		return true;
 	}
 
 	@Override
