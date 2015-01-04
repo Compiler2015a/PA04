@@ -45,5 +45,6 @@ public class Label extends Operand {
 		} else if (!name.equals(other.name))
 			return false;
 		return true;
-	}	
+	}
 }
+
