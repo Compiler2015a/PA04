@@ -53,6 +53,7 @@ public class TranslationVisitor implements Visitor{
     
     //class layouts
     Map<ICClass, ClassLayout> classLayouts;
+    Map<String, ICClass> classes;
     
     //Instructions
     List<Instruction> instructions;
@@ -106,6 +107,8 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(ICClass icClass) {
 		ClassLayout cl = new ClassLayout();
+		
+		classes.put(icClass.getName(), icClass);
 		
 		for (Field field : icClass.getFields()) {
 			field.accept(this);
@@ -327,7 +330,9 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(NewClass newClass) {
-		// TODO Auto-generated method stub
+		List<Operand> args = new ArrayList<Operand>();
+		args.add(new Immediate(classLayouts.get(classes.get(newClass.getName())).getAllocatedSize()));
+		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateObject"), args , registers.request(target)));
 		return null;
 	}
 
@@ -559,7 +564,7 @@ public class TranslationVisitor implements Visitor{
 		switch(literal.getType()) {
 		case STRING:
 			emit("Move str"+stringLiterals.add((String)literal.getValue())+",R"+target); 
-			// TODO ??? //instructions.add(new MoveInstr(labelHandler.innerLabelRequest("str"+stringLiterals.add((String)literal.getValue())), new Reg("R"+target)));
+			instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add((String)literal.getValue())), registers.request(target)));
 			break;
 		case INTEGER:
 			//emit("Move "+((Integer)literal.getValue())+",R"+target);
@@ -602,7 +607,7 @@ public class TranslationVisitor implements Visitor{
         if (className.equals("Library"))
             return name;
 
-        return className + "_" + name;
+        return "_" + className + "_" + name;
     }
     
     public String getEmissionString()
