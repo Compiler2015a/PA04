@@ -57,6 +57,7 @@ import IC.lir.Instructions.MoveInstr;
 import IC.lir.Instructions.Operator;
 import IC.lir.Instructions.Reg;
 import IC.lir.Instructions.ReturnInstr;
+import IC.lir.Instructions.UnaryOpInstr;
 
 public class TranslationVisitor implements Visitor{
 	int target;
@@ -550,7 +551,7 @@ public class TranslationVisitor implements Visitor{
 		if (unaryOp.getOperator() == UnaryOps.UMINUS) {
 			unaryOp.getOperand().accept(this);
 			//emit("Mult -1,R"+target);
-			instructions.add(new BinOpInstr(new Immediate(-1), registers.request(target), Operator.SUB)); // TODO unaryOPinst?
+			instructions.add(new UnaryOpInstr(registers.request(target), Operator.NEG));
 			return true;
 		}
 			
@@ -560,13 +561,14 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(LogicalUnaryOp unaryOp) {
 		if(unaryOp.getOperator() == UnaryOps.LNEG) {
-			target++;
+			//target++;
 			unaryOp.getOperand().accept(this);
-			target--;
+			//target--;
 			//emit("Move 1,R"+target);
 			//emit("Sub R"+(target+1)+",R"+target);
-			instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
-			instructions.add(new BinOpInstr(registers.request(target+1), registers.request(target), Operator.NEG)); // TODO unaryOPinst?
+			//instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
+			//instructions.add(new BinOpInstr(registers.request(target+1), registers.request(target), Operator.NEG)); // TODO unaryOPinst?
+			instructions.add(new UnaryOpInstr(registers.request(target), Operator.NOT));
 			return true;
 		}
 		return false;
