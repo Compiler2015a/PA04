@@ -3,11 +3,17 @@ package IC.lir;
 import java.util.ArrayList;
 import java.util.List;
 
+import IC.lir.Instructions.Instruction;
+import IC.lir.Instructions.LabelInstr;
+import IC.lir.Instructions.StringLiteral;
+
 public class StringLiterals {
 	List<String> literals;
+	List<StringLiteral> sLiterals;
 	
 	public StringLiterals() {
 		literals = new ArrayList<String>();
+		sLiterals = new ArrayList<StringLiteral>();
 	}
 	
 	/**
@@ -16,7 +22,17 @@ public class StringLiterals {
 	 */
 	public int add(String s) {
 		literals.add(s);
+		StringLiteral sl = new StringLiteral("str"+literals.indexOf(s), s);
+		sl.assignAddress(literals.indexOf(s));
+		sLiterals.add(sl);
 		return literals.indexOf(s);
+	}
+	
+	/**
+	 * @return all strings literals in a form of a list of string literals.
+	 */
+	public List<StringLiteral> toLabelInstructions() {
+		return sLiterals;
 	}
 	
 	@Override

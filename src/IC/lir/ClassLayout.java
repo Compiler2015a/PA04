@@ -38,6 +38,14 @@ public class ClassLayout {
 		return fieldToOffset.get(f);
 	}
 	
+	/**
+	 * 
+	 * @return size in bytes needed to allocate this class
+	 */
+	int getAllocatedSize() {
+		return (4*fieldToOffset.size()+4); //4 bytes (32 bits) per field, + 4 bytes for DVPtr
+	}
+	
 	@Override
 	public String toString() {
 		//TODO: DO THIS
