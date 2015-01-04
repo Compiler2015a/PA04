@@ -309,7 +309,8 @@ public class TranslationVisitor implements Visitor{
 		instructions.add(new IC.lir.Instructions.StaticCall(
 				labelHandler.requestStr(getMethodName(call.getClassName(), call.getName()),
 				,registers.request(target))))
-		return null;*/
+				*/
+		return null;
 	}
 
 	@Override
