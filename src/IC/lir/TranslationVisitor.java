@@ -79,7 +79,7 @@ public class TranslationVisitor implements Visitor{
 	public TranslationVisitor() {
 		this.target = 0;
 		this.classLayouts = new HashMap<ICClass,ClassLayout>();
-		this.stringLiterals = new StringLiterals(); //TODO there is also a StringLiteral class in the Instructions package. Replace??
+		this.stringLiterals = new StringLiterals(); //TODO there is also a StringLiteral class in the Instructions package. Replace?? (Answer: no, I fixed it to use that class, it's OK)
 		this.emitted = new StringBuilder();
 		_hasErrors = new boolean[4];
 		this.instructions = new ArrayList<Instruction>();
@@ -176,7 +176,7 @@ public class TranslationVisitor implements Visitor{
         if (method.doesHaveFlowWithoutReturn())
             //not sure about the value 
         	//emit("Return dummy");
-        	instructions.add(new ReturnInstr(new Immediate(0)));
+        	instructions.add(new ReturnInstr(new Reg("Rdummy")));
 
 		return null;
 	}
@@ -333,6 +333,8 @@ public class TranslationVisitor implements Visitor{
 		List<Operand> args = new ArrayList<Operand>();
 		args.add(new Immediate(classLayouts.get(classes.get(newClass.getName())).getAllocatedSize()));
 		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateObject"), args , registers.request(target)));
+		
+		instructions.add(new MoveFieldInstr(registers.request(target), new Immediate(0), labelHandler.requestStr("_DV_"+newClass.getName()), false));
 		return null;
 	}
 

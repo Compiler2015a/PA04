@@ -34,7 +34,7 @@ public class ClassLayout {
 	 */
 	int addField(Field f) {
 		if(!fieldToOffset.containsKey(f))
-			fieldToOffset.put(f, fieldToOffset.size());
+			fieldToOffset.put(f, fieldToOffset.size()+1);
 		return fieldToOffset.get(f);
 	}
 	
