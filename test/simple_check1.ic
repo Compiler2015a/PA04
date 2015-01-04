@@ -1,0 +1,7 @@
+class A {
+	static void main(string[] args) { 
+		int a = 4 + 2;
+		if (a > 5)
+			a = a + 1;
+	}
+}

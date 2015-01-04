@@ -68,6 +68,7 @@ public class Compiler {
 			tv.validate(ICRoot);
 			
 			TranslationVisitor trv=new TranslationVisitor();
+			trv.visit(ICRoot);
 		//	ICRoot.accept(trv);
 			//System.out.println(trv.getEmissionString());
 
