@@ -45,6 +45,7 @@ import IC.AST.VirtualCall;
 import IC.AST.VirtualMethod;
 import IC.AST.Visitor;
 import IC.AST.While;
+import IC.Types.Type;
 import IC.lir.Instructions.*;
 
 public class TranslationVisitor implements Visitor{
@@ -55,7 +56,7 @@ public class TranslationVisitor implements Visitor{
 
 	//class layouts
 	Map<String, ClassLayout> classLayouts;
-	Map<String, ICClass> classes;
+
 
 	//Instructions
 	List<Instruction> instructions;
@@ -78,9 +79,8 @@ public class TranslationVisitor implements Visitor{
 	private Labels labelHandler;
 	private Stack<String> _whileLabelStack;
 	private Stack<String> _endWhileLabelStack;
-	
-	private Map<String, List<String>> methodFullNamesMap;
-	
+	private String currentClassName;
+	private Map<String, List<String>> methodFullNamesMap;	
 	public TranslationVisitor() {
 		this.classLayouts = new HashMap<String,ClassLayout>();
 		this.stringLiterals = new StringLiterals(); //there is also a StringLiteral class in the Instructions package. Replace?? (Answer: no, I fixed it to use that class, it's OK)
@@ -94,7 +94,6 @@ public class TranslationVisitor implements Visitor{
 		this._endWhileLabelStack = new Stack<String>();
 		
 		this.methodFullNamesMap = new HashMap<String, List<String>>();
-		this.classes = new HashMap<String, ICClass>();
 		this.nodeHandlingQueue = new LinkedList<ASTNode>();
 	}
 
@@ -134,22 +133,20 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(ICClass icClass) {
-		ClassLayout cl = new ClassLayout(icClass.getName());
-		if (icClass.hasSuperClass())
-			cl.setSuperClass(classLayouts.get(icClass.getSuperClassName()));
-		classes.put(icClass.getName(), icClass);
+		ClassLayout superCl = icClass.hasSuperClass() ? 
+				classLayouts.get(icClass.getSuperClassName()) : null;
+		ClassLayout cl = new ClassLayout(icClass.getName(), superCl);
 
 		for (Field field : icClass.getFields()) {
 			field.accept(this);
-			cl.addField(field);
+			cl.addField(field.getName());
 		}
 		
 		for (Method method : icClass.getMethods()) {
 			nodeHandlingQueue.add(method);
-			String methodFullName = getMethodName(icClass.getName(), method.getName());
-			method.setMethodFullName(methodFullName);
+			cl.addMethod(method.getName());
+			String methodFullName = cl.getMethodString(method.getName());
 			this.methodFullNamesMap.put(methodFullName, generatMethodParamsList(method));
-			cl.addMethod(method);
 		}
 
 		classLayouts.put(icClass.getName(), cl);
@@ -185,7 +182,8 @@ public class TranslationVisitor implements Visitor{
 		int startLine = target;
 		this.target = 1;
 		// add method label
-		String methodFullName = method.getMethodFullName();
+		currentClassName = method.getSymbolsTable().getId();
+		String methodFullName = classLayouts.get(currentClassName).getMethodString(method.getName());
 		//emit(fullMethodName+":");
 		instructions.add(new LabelInstr(labelHandler.requestStr(methodFullName+":")));
 		
@@ -336,7 +334,7 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(StaticCall call) {
 		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
-		String staticCallMethodFullName = getMethodName(call.getClassName(), call.getName());
+		String staticCallMethodFullName = classLayouts.get(call.getClassName()).getMethodString(call.getName());
 		List<String> methodParams = this.methodFullNamesMap.get(staticCallMethodFullName);
 		int i = 0;
 		for (Expression arg : call.getArguments()) {
@@ -356,7 +354,27 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(VirtualCall call) {
-		// TODO Auto-generated method stub
+		String clsName = call.isExternal() ?
+				call.getLocation().getEntryType().getName() : this.currentClassName;
+		int clsTarget = target;
+		instructions.add(new MoveFieldInstr(registers.request(clsTarget), new Immediate(0), 
+				new Memory(classLayouts.get(clsName).getClassName()), false)); //TODO probably should be removed but where to update if necessary?
+		
+		target++;
+		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
+		String virtualCallMethodFullName = classLayouts.get(clsName).getMethodString(call.getName());
+		List<String> methodParams = this.methodFullNamesMap.get(virtualCallMethodFullName);
+		int i = 0;
+		for (Expression arg : call.getArguments()) {
+			arg.accept(this);
+			paramOpRegs.add(new ParamOpPair(new Memory(methodParams.get(i)), registers.request(target)));
+			i++;
+			target++;
+		}
+		Immediate funcIndex = new Immediate(classLayouts.get(clsName).getMethodIndex(call.getName()));
+		instructions.add(new IC.lir.Instructions.VirtualCall(
+				registers.request(clsTarget), funcIndex, paramOpRegs, registers.request(-1)));
+		
 		return null;
 	}
 
@@ -650,16 +668,6 @@ public class TranslationVisitor implements Visitor{
 
 	public void emit(String s) {
 		emitted.append(s+"\n");
-	}
-
-	private String getMethodName(String className, String name) {
-		if (name.equals("main"))
-			return "_ic_main";
-
-		if (className.equals("Library"))
-			return name;
-
-		return "_" + className + "_" + name;
 	}
 
 	public String getEmissionString()

@@ -1,23 +1,28 @@
 package IC.lir;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-import IC.AST.Field;
-import IC.AST.Method;
 
 public class ClassLayout {
-	String className;
-	ClassLayout superClass;
-	Map<Method, Integer> methodToOffset;
+	private String className;
+	private List<MethodStrc> methods;
+	private List<String> fields;
 	//DVPtr = 0;
-	Map<Field, Integer> fieldToOffset;
+	
+	public ClassLayout(String className, ClassLayout superClassLayout) {
+		this.className = "_DV_" + className;
+		this.methods = new ArrayList<MethodStrc>();
+		this.fields = new ArrayList<String>();
+		if (superClassLayout != null) {
+			this.methods.addAll(superClassLayout.methods);
+			this.fields.addAll(superClassLayout.fields);
+		}
+	}
 
-	public ClassLayout(String className) {
-		this.className = className;
-		this.superClass = null;
-		methodToOffset = new HashMap<Method, Integer>();
-		fieldToOffset = new HashMap<Field, Integer>();
+	
+	public String getClassName() {
+		return className;
 	}
 
 	/**
@@ -25,10 +30,16 @@ public class ClassLayout {
 	 * @param m Method to add to method offset
 	 * @return the method's offset
 	 */
-	int addMethod(Method m) {
-		if(!methodToOffset.containsKey(m))
-			methodToOffset.put(m, methodToOffset.size());
-		return methodToOffset.get(m);
+	public void addMethod(String methodName) {
+		MethodStrc methodStrc = findMethod(methods, methodName);
+		if (methodStrc != null) { // overriding case:
+			methods.remove(methodStrc);
+			methodStrc.clsName = this.className;
+		}
+		else
+			methodStrc = new MethodStrc(methodName, this.className);
+		methods.add(methodStrc);
+		
 	}
 
 	/**
@@ -36,38 +47,48 @@ public class ClassLayout {
 	 * @param f Field to add to field offset
 	 * @return the field's offset
 	 */
-	int addField(Field f) {
-		if(!fieldToOffset.containsKey(f))
-			fieldToOffset.put(f, fieldToOffset.size()+1);
-		return fieldToOffset.get(f);
+	public void addField(String fieldName) {
+		fields.add(fieldName);
 	}
 	
 	/**
 	 * 
 	 * @return size in bytes needed to allocate this class
 	 */
-	int getAllocatedSize() {
-		int allocatedSize = 4*fieldToOffset.size()+4;
-		if (this.hasSuperClass())
-			allocatedSize += superClass.getAllocatedSize() - 4; //  only fields without super class DVPtr
-		return (allocatedSize); //4 bytes (32 bits) per field, + 4 bytes for DVPtr
+	public int getAllocatedSize() {
+		return (fields.size() + 1) * 4; //4 bytes (32 bits) per field, + 4 bytes for DVPtr
 	}
 	
+	public int getMethodIndex(String methodName) {
+		int i = 0;
+		for (MethodStrc methodStrc : methods) {
+			if (methodStrc.methodName.equals(methodName))
+				return i;
+			i++;
+		}
+		
+		return -1;
+	}
+	
+	public String getMethodString(String methodName) {
+		for (MethodStrc methodStrc : methods) {
+			if (methodStrc.methodName.equals(methodName))
+				return methodStrc.toString();
+		}
+		
+		return null;
+	}
 	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append("_DV_"+className+": [");
+		sb.append(className +": [");
 		
 		//sort methods according to their offsets
-		Method[] arr = new Method[methodToOffset.size()];
-		for(Method m: methodToOffset.keySet())
-			arr[methodToOffset.get(m)]=m;
-		
-		for(int i=0;i<arr.length;i++) {
-			sb.append("_"+className+"_"+arr[i].getName());
-			if(i<arr.length-1)
+		for (int i = 0; i < methods.size(); i++) {
+			sb.append(methods.get(i).toString());
+			if(i < methods.size() - 1)
 				sb.append(",");
 		}
 		
@@ -75,12 +96,26 @@ public class ClassLayout {
 		
 		return sb.toString();
 	}
-
-	public void setSuperClass(ClassLayout superClass) {
-		this.superClass = superClass;
-	}
 	
-	public boolean hasSuperClass() {
-		return (superClass != null);
+	private MethodStrc findMethod(List<MethodStrc> list, String methodName) {
+		for (MethodStrc methodStrc : list)
+			if (methodStrc.methodName.equals(methodName))
+				return methodStrc;
+		
+		return null;
+	}
+	private class MethodStrc {
+		private String methodName;
+		private String clsName;
+		
+		public MethodStrc(String methodName, String clsName) {
+			this.methodName = methodName;
+			this.clsName = clsName;
+		}
+		
+		@Override
+		public String toString() {
+			return "_" + clsName + "_" + methodName;
+		}
 	}
 }

@@ -1,16 +1,17 @@
 class A {
 	static void main(string[] args) { 
-		A a = new C();
-
+		C c = new C();
+		c.foo1(2);
 	}
-	int x;
-	int y;
+	int f0;
+	int foo1(int x) { return 0; }
 }
 
 class B extends A {
-	int a,b,z;
+	int f1;
+	int foo2(int x) { return 1; }
 }
 
 class C extends B {
-	int c;
+	int foo1(int x) { return 0; }
 }
