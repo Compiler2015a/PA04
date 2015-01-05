@@ -230,6 +230,8 @@ public class TranslationVisitor implements Visitor{
 	public Object visit(Assignment assignment) {
 		assignment.getAssignment().accept(this);
 		instructions.add(new MoveInstr(registers.request(target), new Memory(((VariableLocation)assignment.getVariable()).getName()))); //TODO: what if variable is external?
+		
+		
 		return null;
 	}
 
@@ -248,7 +250,7 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(If ifStatement) {
-		//System.out.println("bla "+ifStatement.getCondition()+"\n");
+		
 		ifStatement.getCondition().accept(this);
 		labelHandler.increaseLabelsCounter();
 		int ifLabel = labelHandler.getLabelsCounter();
@@ -300,8 +302,11 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(StatementsBlock statementsBlock) {
+		
 		for(Statement stmnt : statementsBlock.getStatements())
+		{
 			stmnt.accept(this);
+		}
 		return null;
 	}
 
@@ -338,13 +343,13 @@ public class TranslationVisitor implements Visitor{
 		List<String> methodParams = this.methodFullNamesMap.get(staticCallMethodFullName);
 		int i = 0;
 		for (Expression arg : call.getArguments()) {
+			
 			arg.accept(this);
 			paramOpRegs.add(new ParamOpPair(new Memory(methodParams.get(i)), registers.request(target)));
 			i++;
 			target++;
 		}
 		
-
 		instructions.add(new IC.lir.Instructions.StaticCall(
 				labelHandler.requestStr(staticCallMethodFullName), paramOpRegs, 
 				registers.request(-1)));
@@ -396,12 +401,47 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(NewArray newArray) {
+		
 		List<Operand> args = new ArrayList<Operand>();
 		target++;
-		newArray.getSize().accept(this); //TODO: What kind of Expression is size in an array? are we handling it correctly?
+		
+		Object size = newArray.getSize().accept(this); //TODO: What kind of Expression is size in an array? are we handling it correctly?
 		args.add(registers.request(target--));
+		
 		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateArray"), args, registers.request(target)));
+		
+        // check if array size is non-negative
+		checkSizeGtZeroAndEmit(args.get(0));
+		_hasErrors[2] = true;
+
 		return true;
+	}
+	
+	private void checkSizeGtZeroAndEmit(Operand size)
+	{
+		instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
+		instructions.add(new MoveInstr(size, registers.request(target++)));
+		instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
+		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.L));
+		instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
+		instructions.add(new JumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
+		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL)));
+		instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
+		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
+
+		labelHandler.increaseLabelsCounter();
+		int ifLabel = labelHandler.getLabelsCounter();
+		instructions.add(new CompareInstr(new Immediate(1), registers.request(target)));
+		CommonLabels jumpingLabel = CommonLabels.END_LABEL;
+		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(jumpingLabel, ifLabel), Cond.False));
+		
+		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add("Runtime Error")), registers.request(target)));
+		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
+		paramOpRegs.add(new ParamOpPair(new Memory("s"), registers.request(target)));
+		instructions.add(new IC.lir.Instructions.StaticCall
+				(labelHandler.requestStr("Library_print"), paramOpRegs, registers.request(-1)));
+		
+		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, ifLabel)));
 	}
 
 	@Override
@@ -409,10 +449,14 @@ public class TranslationVisitor implements Visitor{
 		target++;
 		length.getArray().accept(this);
 		target--;
+		Object o=length.getArray();
 		//emit("ArrayLength R"+(target+1)+",R"+target);
 		instructions.add(new ArrayLengthInstr(registers.request(target+1), registers.request(target)));
+		
+		
 		return null;
 	}
+	
 
 	@Override
 	public Object visit(MathBinaryOp binaryOp) {
