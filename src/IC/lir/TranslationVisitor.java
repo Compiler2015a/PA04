@@ -669,7 +669,8 @@ public class TranslationVisitor implements Visitor{
 		target--;
 		//emit("Move 1,R"+target);
 		//emit("Sub R"+(target+1)+",R"+target);
-		instructions.add(new UnaryOpInstr(registers.request(target), Operator.NOT));
+		instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
+		instructions.add(new BinOpInstr(registers.request(target+1), registers.request(target), Operator.SUB));
 		return null;
 	}
 
