@@ -1,0 +1,22 @@
+class IFS { 
+
+	static void main (string[] args) { 
+	    int a = 5;
+		int b = 10;
+		int c = 20;
+
+		Library.printi(a+b+c);  // should print 35
+		Library.println("");
+
+		Library.printi(a * b + c); // should print 70
+		Library.println("");
+
+		Library.printi((b / a) * c + c * c); // should print 440
+		Library.println("");
+
+		Library.printi(c - b - a - 5); // should print 0
+		Library.println("");
+
+	}
+}
+

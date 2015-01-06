@@ -343,16 +343,14 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(ArrayLocation location) {
 		int assignmentTarget = target;
+		target++;
 		location.getArray().accept(this);
-		int arrayTarget = target;
+		target--;
 		location.getIndex().accept(this);
-		int offsetTarget = target;
 		currentAssignmentInstruction = new MoveArrayInstr(
-				registers.request(arrayTarget), registers.request(offsetTarget), 
+				registers.request(target+1), registers.request(target), 
 				registers.request(assignmentTarget), false);
-		instructions.add(new MoveArrayInstr(
-				registers.request(arrayTarget), registers.request(offsetTarget),
-				registers.request(arrayTarget), true));
+		instructions.add(new MoveArrayInstr(registers.request(target+1), registers.request(target), registers.request(target), false));
 		return null;
 	}
 
@@ -711,7 +709,7 @@ public class TranslationVisitor implements Visitor{
 	public Object visit(Literal literal) {
 		switch(literal.getType()) {
 		case STRING:
-			emit("Move str"+stringLiterals.add((String)literal.getValue())+",R"+target); 
+			//emit("Move str"+stringLiterals.add((String)literal.getValue())+",R"+target); 
 			instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add((String)literal.getValue())), registers.request(target)));
 			break;
 		case INTEGER:

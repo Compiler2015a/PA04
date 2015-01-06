@@ -1,0 +1,66 @@
+str0: In Foo_rise
+str1: In Foo_shine
+str2: In Bar_rise
+str3: In Bar_twinkle
+_DV_Foo: [_DV_Bar_rise,_DV_Foo_shine,_DV_Foo_main]
+_DV_Library: [_DV_Library_println,_DV_Library_print,_DV_Library_printi,_DV_Library_printb,_DV_Library_readi,_DV_Library_readln,_DV_Library_eof,_DV_Library_stoi,_DV_Library_itos,_DV_Library_stoa,_DV_Library_atos,_DV_Library_random,_DV_Library_time,_DV_Library_exit]
+_DV_Bar: [_DV_Foo_shine,_DV_Foo_main,_DV_Bar_rise,_DV_Bar_twinkle]
+_DV_Bar_rise:
+Move x,R1
+Move str0,R2
+StaticCall _DV_Library_println(s=R3),Rdummy
+Move x,R4
+StaticCall _DV_Library_printi(i=R4),Rdummy
+Move 2,R5
+Return R6
+_DV_Foo_shine:
+Move x,R1
+Move str1,R2
+StaticCall _DV_Library_println(s=R3),Rdummy
+Move x,R4
+StaticCall _DV_Library_printi(i=R4),Rdummy
+Move 1,R5
+Return R6
+_DV_Foo_main:
+Move args,R1
+Library __allocateObject(16),R2
+MoveField _DV_Bar,R2.0
+Move R2,f
+MoveField _DV_Foo,R2.0
+Move 1,R3
+VirtualCall R2.0(x=R4),Rdummy
+MoveField _DV_Foo,R5.0
+Move 2,R6
+VirtualCall R5.1(x=R7),Rdummy
+Library __allocateObject(12),R8
+MoveField _DV_Foo,R8.0
+Move f,R8
+Move R8,f
+MoveField _DV_Foo,R8.0
+Move 4,R9
+VirtualCall R8.0(x=R10),Rdummy
+MoveField _DV_Foo,R11.0
+Move 5,R12
+VirtualCall R11.1(x=R13),Rdummy
+Library __allocateObject(16),R14
+MoveField _DV_Bar,R14.0
+Move R14,b
+MoveField _DV_Bar,R14.0
+Move 3,R15
+VirtualCall R14.3(x=R16),Rdummy
+_DV_Bar_rise:
+Move x,R1
+Move str2,R2
+StaticCall _DV_Library_println(s=R3),Rdummy
+Move x,R4
+StaticCall _DV_Library_printi(i=R4),Rdummy
+Move 3,R5
+Return R6
+_DV_Bar_twinkle:
+Move x,R1
+Move str3,R2
+StaticCall _DV_Library_println(s=R3),Rdummy
+Move x,R4
+StaticCall _DV_Library_printi(i=R4),Rdummy
+Move 4,R5
+Return R6

@@ -1,0 +1,18 @@
+	
+class A {
+	static boolean true_print() {
+	 Library.println("Should not be printed");
+	 return true;
+	}
+} 
+
+class Check {
+	static void main (string[] args) { 
+		
+		Library.println("short circuit");
+		boolean b = true;
+		if (b || A.true_print()) {
+		 Library.println("This is ok");
+		}
+ 	}
+}
