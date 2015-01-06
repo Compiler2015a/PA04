@@ -8,7 +8,7 @@ str6: "equals3"
 str7: "equals4"
 str8: "acb"
 str9: "not equals (should not be printed)"
-_DV_Library: [_DV_Library_println,_DV_Library_print,_DV_Library_printi,_DV_Library_printb,_DV_Library_readi,_DV_Library_readln,_DV_Library_eof,_DV_Library_stoi,_DV_Library_itos,_DV_Library_stoa,_DV_Library_atos,_DV_Library_random,_DV_Library_time,_DV_Library_exit]
+#_DV_Library: [_DV_Library_println,_DV_Library_print,_DV_Library_printi,_DV_Library_printb,_DV_Library_readi,_DV_Library_readln,_DV_Library_eof,_DV_Library_stoi,_DV_Library_itos,_DV_Library_stoa,_DV_Library_atos,_DV_Library_random,_DV_Library_time,_DV_Library_exit]
 _DV_IFS: [_ic_main,_DV_IFS_len]
 _ic_main:
 Move str0,R1

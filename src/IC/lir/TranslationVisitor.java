@@ -151,8 +151,8 @@ public class TranslationVisitor implements Visitor{
 			String methodFullName = cl.getMethodString(method.getName());
 			this.methodFullNamesMap.put(methodFullName, generatMethodParamsList(method));
 		}
-
-		classLayouts.put(icClass.getName(), cl);
+		if(!icClass.getName().equals("Library"))
+			classLayouts.put(icClass.getName(), cl);
 		return null;
 	}
 
