@@ -127,7 +127,7 @@ public class ClassLayout {
 		public String toString() {
 			if (methodName.equals("main"))
 				return  "_ic_main";
-			return "_" + clsName + "_" + methodName;
+			return /*"_" +*/ clsName + "_" + methodName;
 		}
 	}
 }
