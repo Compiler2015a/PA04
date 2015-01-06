@@ -176,27 +176,25 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(LibraryMethod method) {
-		//System.out.println("4");
 		return null;
 	}
 
 	private Object visitMethod(Method method)
 	{
-		int startLine = target;
-		this.target = 1;
+		this.target = 0;
 		// add method label
 		currentClassName = method.getSymbolsTable().getId();
 		String methodFullName = classLayouts.get(currentClassName).getMethodString(method.getName());
 		//emit(fullMethodName+":");
-		instructions.add(new LabelInstr(labelHandler.requestStr(methodFullName+":")));
+		instructions.add(new LabelInstr(labelHandler.requestStr(methodFullName)));
 		
 		// add new registers for this method
 		//    _registers = new HashMap<>();
 		_nextRegisterNum = 0;
 
 		for (Formal formal : method.getFormals()) {
-			formal.accept(this);
 			target++;
+			formal.accept(this);
 		}
 		
 		// add all statements
@@ -315,6 +313,7 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(LocalVariable localVariable) {
 		if (localVariable.hasInitValue()) {
+			target++;
 			localVariable.getInitValue().accept(this);
 			instructions.add(new MoveInstr(registers.request(target), new Memory(localVariable.getName())));
 		}
@@ -343,28 +342,51 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(ArrayLocation location) {
-		// TODO Auto-generated method stub
+		int assignmentTarget = target;
+		location.getArray().accept(this);
+		int arrayTarget = target;
+		location.getIndex().accept(this);
+		int offsetTarget = target;
+		currentAssignmentInstruction = new MoveArrayInstr(
+				registers.request(arrayTarget), registers.request(offsetTarget), 
+				registers.request(assignmentTarget), false);
+		instructions.add(new MoveArrayInstr(
+				registers.request(arrayTarget), registers.request(offsetTarget),
+				registers.request(arrayTarget), true));
 		return null;
 	}
 
 	@Override
 	public Object visit(StaticCall call) {
-		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
-		String staticCallMethodFullName = classLayouts.get(call.getClassName()).getMethodString(call.getName());
-		List<String> methodParams = this.methodFullNamesMap.get(staticCallMethodFullName);
-		int i = 0;
-		for (Expression arg : call.getArguments()) {
-			
-			arg.accept(this);
-			paramOpRegs.add(new ParamOpPair(new Memory(methodParams.get(i)), registers.request(target)));
-			i++;
-			target++;
+		//library method call		
+		if (call.getClassName().equals("Library")) {
+			List<Operand> operands = new ArrayList<Operand>();
+			for (Expression arg : call.getArguments()) {
+				
+				arg.accept(this);
+				operands.add(registers.request(target));
+				target++;
+			}
+			int retTrarget = call.getMethodType().getReturnType().isVoidType() ? -1 : target;
+			instructions.add(new LibraryCall(labelHandler.requestStr("__" + call.getName()), operands, registers.request(retTrarget)));
+		} // regular method call
+		else {
+			List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
+			String staticCallMethodFullName = classLayouts.get(call.getClassName()).getMethodString(call.getName());
+			List<String> methodParams = this.methodFullNamesMap.get(staticCallMethodFullName);
+			int i = 0;
+			for (Expression arg : call.getArguments()) {
+				
+				arg.accept(this);
+				paramOpRegs.add(new ParamOpPair(new Memory(methodParams.get(i)), registers.request(target)));
+				i++;
+				target++;
+			}
+			int retTrarget = call.getMethodType().getReturnType().isVoidType() ? -1 : target;
+			instructions.add(new IC.lir.Instructions.StaticCall(
+					labelHandler.requestStr(staticCallMethodFullName), paramOpRegs, 
+					registers.request(retTrarget)));
 		}
-		
-		instructions.add(new IC.lir.Instructions.StaticCall(
-				labelHandler.requestStr(staticCallMethodFullName), paramOpRegs, 
-				registers.request(-1)));
-		 
 		return null;
 	}
 
@@ -373,8 +395,7 @@ public class TranslationVisitor implements Visitor{
 		String clsName = call.isExternal() ?
 				call.getLocation().getEntryType().toString() : this.currentClassName;
 		int clsTarget = target;
-		instructions.add(new MoveFieldInstr(registers.request(clsTarget), new Immediate(0), 
-				new Memory(classLayouts.get(clsName).getClassName()), false)); //TODO probably should be removed but where to update if necessary?
+		instructions.add(new MoveInstr(new Memory(clsName), registers.request(target)));
 		
 		target++;
 		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
@@ -416,7 +437,7 @@ public class TranslationVisitor implements Visitor{
 		List<Operand> args = new ArrayList<Operand>();
 		target++;
 		
-		Object size = newArray.getSize().accept(this); //TODO: What kind of Expression is size in an array? are we handling it correctly?
+		newArray.getSize().accept(this); 
 		instructions.add(new BinOpInstr(new Immediate(4), registers.request(target), Operator.MUL)); //multiply size by 4
 		args.add(registers.request(target--));
 		
@@ -712,7 +733,6 @@ public class TranslationVisitor implements Visitor{
 		default:
 
 		}
-		target++;
 		return null; 
 	}
 

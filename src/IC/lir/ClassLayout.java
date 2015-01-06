@@ -31,13 +31,19 @@ public class ClassLayout {
 	 * @return the method's offset
 	 */
 	public void addMethod(String methodName) {
-		MethodStrc methodStrc = findMethod(methods, methodName);
-		if (methodStrc != null) { // overriding case:
-			methods.remove(methodStrc);
-			methodStrc.clsName = this.className;
-		}
-		else
+		MethodStrc methodStrc;
+		if (methodName.equals("main")) {
 			methodStrc = new MethodStrc(methodName, this.className);
+		}
+		else {
+			methodStrc = findMethod(methods, methodName);
+			if (methodStrc != null) { // overriding case:
+				methods.remove(methodStrc);
+				methodStrc.clsName = this.className;
+			}
+			else
+				methodStrc = new MethodStrc(methodName, this.className);
+		}
 		methods.add(methodStrc);
 		
 	}
@@ -119,6 +125,8 @@ public class ClassLayout {
 		
 		@Override
 		public String toString() {
+			if (methodName.equals("main"))
+				return  "_ic_main";
 			return "_" + clsName + "_" + methodName;
 		}
 	}

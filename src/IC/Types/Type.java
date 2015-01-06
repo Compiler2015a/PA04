@@ -26,6 +26,10 @@ public abstract class Type {
 		return (this instanceof ClassType);
 	}
 	
+	public boolean isMethodType() {
+		return (this instanceof MethodType);
+	}
+	
 	public boolean isArrayType() {
 		return (this instanceof ArrayType);
 	}
@@ -48,6 +52,13 @@ public abstract class Type {
 	
 	public boolean isNullType() {
 		return (this instanceof NullType);
+	}
+	
+	public Type getReturnType() {
+		if (!this.isMethodType())
+			return null;
+		MethodType thisMethodType = (MethodType)this;
+		return thisMethodType.getReturnType();
 	}
 	
 	public boolean isNullAssignable() {

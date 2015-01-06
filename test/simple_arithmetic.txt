@@ -1,0 +1,8 @@
+class A {
+	static void main(string[] args) {
+		int x = 6;
+		int y = 4;
+		int z = (x + y) / 2;
+		Library.println(Library.itos(z));
+	}
+}

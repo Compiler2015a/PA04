@@ -1,0 +1,15 @@
+_ic_main:
+Move args,R1
+Move 6,R2
+Move R2,x
+Move 4,R3
+Move R3,y
+Move x,R4
+Move y,R5
+Add R5,R4
+Move 2,R5
+Div R5,R4
+Move R4,z
+Move z,R4
+Library __itos(R4),R5
+Library __println(R5),Rdummy
