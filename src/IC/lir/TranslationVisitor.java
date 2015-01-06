@@ -469,7 +469,7 @@ public class TranslationVisitor implements Visitor{
 		CommonLabels jumpingLabel = CommonLabels.END_LABEL;
 		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(jumpingLabel, ifLabel), Cond.False));
 		
-		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add("Runtime Error")), registers.request(target))); //TODO: messes up strings
+		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[2])), registers.request(target))); //TODO: messes up strings
 		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
 		paramOpRegs.add(new ParamOpPair(new Memory("s"), registers.request(target)));
 		instructions.add(new IC.lir.Instructions.StaticCall
@@ -532,8 +532,11 @@ public class TranslationVisitor implements Visitor{
 			return false;
 		}
 		//emit(instruction+" R"+target+",R"+(--target));
-		instructions.add(new BinOpInstr(registers.request(target), registers.request(--target), op));
-
+		Reg leftReg=registers.request(target);
+		Reg rightReg=registers.request(--target);
+		instructions.add(new BinOpInstr(leftReg, rightReg, op));
+		if(binaryOp.getOperator()==IC.BinaryOps.DIVIDE || binaryOp.getOperator()==IC.BinaryOps.MOD)
+			divisionCheck(leftReg);
 		return true;
 	}
 
@@ -759,5 +762,38 @@ public class TranslationVisitor implements Visitor{
 			output.add(formal.getName());
 		return output;
 	}
+	
+	private void divisionCheck(Reg reg) {
+        _hasErrors[3] = true;
+        target+=2;
+        instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
+		instructions.add(new MoveInstr(reg, registers.request(++target)));
+		instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
+		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.False));
+		instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
+		instructions.add(new JumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
+		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL)));
+		instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
+		
+		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
+
+		labelHandler.increaseLabelsCounter();
+		int ifLabel = labelHandler.getLabelsCounter();
+		instructions.add(new CompareInstr(new Immediate(1), registers.request(target)));
+		CommonLabels jumpingLabel = CommonLabels.END_LABEL;
+		
+		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(jumpingLabel, ifLabel), Cond.False));
+		
+		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[3])), registers.request(target)));
+		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
+		paramOpRegs.add(new ParamOpPair(new Memory("s"), registers.request(target)));
+		instructions.add(new IC.lir.Instructions.StaticCall
+				(labelHandler.requestStr("Library_print"), paramOpRegs, registers.request(-1)));
+		
+		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, ifLabel)));
+        
+    }
+
+
 	
 }
