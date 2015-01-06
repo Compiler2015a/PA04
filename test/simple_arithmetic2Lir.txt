@@ -1,0 +1,23 @@
+_ic_main:
+Move 3,R1
+Move R1,x
+Move x,R2
+Move x,R3
+Mul R3,R2
+Move R2,y
+Move this,R2
+Move y,R3
+Move 1,R4
+Add R4,R3
+VirtualCall R2.1(x=R3),R2
+Library __itos(R2),R2
+Library __println(R2),Rdummy
+__DV_A_foo:
+Move x,R1
+Move 4,R2
+Add R2,R1
+Move R1,a
+Move a,R1
+Move 2,R2
+Mul R2,R1
+Return R1

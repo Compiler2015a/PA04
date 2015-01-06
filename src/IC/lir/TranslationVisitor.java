@@ -191,11 +191,6 @@ public class TranslationVisitor implements Visitor{
 		// add new registers for this method
 		//    _registers = new HashMap<>();
 		_nextRegisterNum = 0;
-
-		for (Formal formal : method.getFormals()) {
-			target++;
-			formal.accept(this);
-		}
 		
 		// add all statements
 		for (Statement stmt : method.getStatements()) {
@@ -213,7 +208,6 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(Formal formal) {
-		instructions.add(new MoveInstr(new Memory(formal.getName()), registers.request(target)));
 		return null;
 	}
 
@@ -356,15 +350,17 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(StaticCall call) {
+		int unusedMethodTarget = target;
 		//library method call		
 		if (call.getClassName().equals("Library")) {
 			List<Operand> operands = new ArrayList<Operand>();
+			
 			for (Expression arg : call.getArguments()) {
-				
 				arg.accept(this);
 				operands.add(registers.request(target));
 				target++;
 			}
+			target = unusedMethodTarget;
 			int retTrarget = call.getMethodType().getReturnType().isVoidType() ? -1 : target;
 			instructions.add(new LibraryCall(labelHandler.requestStr("__" + call.getName()), operands, registers.request(retTrarget)));
 		} // regular method call
@@ -380,6 +376,7 @@ public class TranslationVisitor implements Visitor{
 				i++;
 				target++;
 			}
+			target = unusedMethodTarget;
 			int retTrarget = call.getMethodType().getReturnType().isVoidType() ? -1 : target;
 			instructions.add(new IC.lir.Instructions.StaticCall(
 					labelHandler.requestStr(staticCallMethodFullName), paramOpRegs, 
@@ -390,11 +387,15 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(VirtualCall call) {
+		if (call.isExternal()) // TODO CHECK!!!!!!!!!!!
+			call.getLocation().accept(this);
+		Operand loadingOperand = call.isExternal() ? registers.request(target-1) : new Memory("this");
+		int clsTarget = target;
+		
+		instructions.add(new MoveInstr(loadingOperand, registers.request(target)));
 		String clsName = call.isExternal() ?
 				call.getLocation().getEntryType().toString() : this.currentClassName;
-		int clsTarget = target;
-		instructions.add(new MoveInstr(new Memory(clsName), registers.request(target)));
-		
+		int unusedMethodTarget = target;
 		target++;
 		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
 		String virtualCallMethodFullName = classLayouts.get(clsName).getMethodString(call.getName());
@@ -407,8 +408,10 @@ public class TranslationVisitor implements Visitor{
 			target++;
 		}
 		Immediate funcIndex = new Immediate(classLayouts.get(clsName).getMethodIndex(call.getName()));
+		target = unusedMethodTarget;
+		int retTrarget = call.getMethodType().getReturnType().isVoidType() ? -1 : target;
 		instructions.add(new IC.lir.Instructions.VirtualCall(
-				registers.request(clsTarget), funcIndex, paramOpRegs, registers.request(-1)));
+				registers.request(clsTarget), funcIndex, paramOpRegs, registers.request(retTrarget)));
 		
 		return null;
 	}
