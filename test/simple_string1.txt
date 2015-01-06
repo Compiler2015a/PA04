@@ -1,0 +1,7 @@
+class IFS { 
+	
+	static void main (string[] args) { 
+		Library.println("a" + "b");  // "a"
+	}
+	
+}

@@ -537,18 +537,20 @@ public class TypeValidator implements Visitor {
 		
 		// Checking that the method has a return statement in each computation path:
 		MethodType methodType = (MethodType)method.getEntryType();
-		if (methodType.getReturnType().isVoidType()) // if this is a void type method, no return statement is needed.
-			return true;
+		
 		
 		if((method instanceof LibraryMethod)) // if this is a library method, no return statement is needed.
 			return true;
 		
 
 		if (!testRetrunPaths(method.getStatements())) { // No return statement error:
-			semanticErrorThrower =  new SemanticErrorThrower(method.getLine(), String.format("Method %s has no return statement", method.getName()));
-			return false;
+			if (!methodType.getReturnType().isVoidType()) {// if this is a void type method, no return statement is needed.
+				semanticErrorThrower =  new SemanticErrorThrower(method.getLine(), String.format("Method %s has no return statement", method.getName()));
+				return false;
+			}
+			return true;
 		}
-		
+		method.setHasFlowWithoutReturn();
 		return true;
 	}
 	
