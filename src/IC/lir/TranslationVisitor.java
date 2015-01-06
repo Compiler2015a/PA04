@@ -417,6 +417,7 @@ public class TranslationVisitor implements Visitor{
 		target++;
 		
 		Object size = newArray.getSize().accept(this); //TODO: What kind of Expression is size in an array? are we handling it correctly?
+		instructions.add(new BinOpInstr(new Immediate(4), registers.request(target), Operator.MUL)); //multiply size by 4
 		args.add(registers.request(target--));
 		
 		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateArray"), args, registers.request(target)));
