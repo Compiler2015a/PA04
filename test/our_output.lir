@@ -1,160 +1,37 @@
-str0: "a"
-str1: "b"
-str2: "c"
-str3: "ab"
-str4: "equals1"
-str5: "equals2"
-str6: "equals3"
-str7: "equals4"
-str8: "acb"
-str9: "not equals (should not be printed)"
-#_DV_Library: [_DV_Library_println,_DV_Library_print,_DV_Library_printi,_DV_Library_printb,_DV_Library_readi,_DV_Library_readln,_DV_Library_eof,_DV_Library_stoi,_DV_Library_itos,_DV_Library_stoa,_DV_Library_atos,_DV_Library_random,_DV_Library_time,_DV_Library_exit]
-_DV_IFS: [_ic_main,_DV_IFS_len]
+str0: "y="
+_DV_A: [_DV_B_foo,_ic_main]
+_DV_B: [_ic_main,_DV_B_foo]
+_DV_B_foo:
+Move y,R1
+Move 1,R2
+Add R2,R1
+Move R1,z
+Move z,R1
+Return R1
 _ic_main:
-Move str0,R1
-Move R1,a
-Move str1,R2
-Move R2,b
-Move str2,R3
-Move R3,c
-Move a,R3
-Library __println(R3),Rdummy
-Move a,R3
-Move b,R4
-Library __stringCat(R4, R5),R4
-Library __println(R4),Rdummy
-Move c,R3
-Move b,R4
-Library __stringCat(R4, R5),R4
-Move a,R5
-Library __stringCat(R5, R6),R5
-Library __println(R5),Rdummy
-Move this,R3
-Move str3,R4
-VirtualCall R3.1(s=R4),R3
-Move this,R4
-Move a,R5
-Move b,R6
-Library __stringCat(R6, R7),R6
-VirtualCall R4.1(s=R6),R4
-Compare R4,R3
-JumpFalse _true_label1
-Move 0,R3
-Jump _end_label1
-_true_label1:
-Move 1,R3
-_end_label1:
-Compare 1,R3
-JumpFalse _end_label2
-Move str4,R3
-Library __println(R3),Rdummy
-_end_label2:
-Move this,R3
-Move str3,R4
-VirtualCall R3.1(s=R4),R3
-Move this,R4
-Move str3,R5
-VirtualCall R4.1(s=R5),R4
-Compare R4,R3
-JumpFalse _true_label3
-Move 0,R3
-Jump _end_label3
-_true_label3:
-Move 1,R3
-_end_label3:
-Compare 1,R3
-JumpFalse _end_label4
-Move str5,R3
-Library __println(R3),Rdummy
-_end_label4:
-Move a,R4
-Move b,R5
-Library __stringCat(R5, R6),R5
-Move R5,ab
-Move this,R5
-Move str3,R6
-VirtualCall R5.1(s=R6),R5
-Move this,R6
-Move ab,R7
-VirtualCall R6.1(s=R7),R6
-Compare R6,R5
-JumpFalse _true_label5
-Move 0,R5
-Jump _end_label5
-_true_label5:
-Move 1,R5
-_end_label5:
-Compare 1,R5
-JumpFalse _end_label6
-Move str6,R5
-Library __println(R5),Rdummy
-_end_label6:
-Move ab,R6
-Move R6,abab
-Move ab,R6
-Move abab,R7
-Compare R7,R6
-JumpFalse _true_label7
-Move 0,R6
-Jump _end_label7
-_true_label7:
-Move 1,R6
-_end_label7:
-Compare 1,R6
-JumpFalse _end_label8
-Move str7,R6
-Library __println(R6),Rdummy
-_end_label8:
-Move this,R6
-Move str8,R7
-VirtualCall R6.1(s=R7),R6
-Move this,R7
-Move a,R8
-Move c,R9
-Library __stringCat(R9, R10),R9
-VirtualCall R7.1(s=R9),R7
-Compare R7,R6
-JumpFalse _true_label9
-Move 0,R6
-Jump _end_label9
-_true_label9:
-Move 1,R6
-_end_label9:
-Compare 1,R6
-JumpFalse _end_label10
-Move str9,R6
-Library __println(R6),Rdummy
-_end_label10:
-Move 0,R7
-Move R7,i
-_test_label11:
-Move 3,R7
-Move i,R8
-Compare R8,R7
-JumpL _true_label12
-Move 0,R7
-Jump _end_label12
-_true_label12:
-Move 1,R7
-_end_label12:
-Compare 1,R7
-JumpFalse _end_label11
-Move a,R7
-Move a,R8
-Library __stringCat(R8, R9),R8
-Move a,R8
-Move R8,a
-Move i,R8
-Move 1,R9
-Add R9,R8
-Move i,R8
-Move R8,i
-Jump _test_label11
-_end_label11:
-Move a,R8
-Library __println(R8),Rdummy
-_DV_IFS_len:
+Library __allocateObject(16),R1
+MoveField _DV_B,R1.0
+Move R1,p
+Move p,R1
+Move R0,R1 #####
+Move 5,R2
+VirtualCall R1.0(y=R2),R1
+_DV_B_foo:
+Move str0,R0
+Move y,R1
+Library __itos(R1),R1
+Library __stringCat(R1, R2),R1
 Move s,R1
-Library __stoa(R1),R1
-ArrayLength R1,R0
-Return R0
+Move R1,s
+Move s,R1
+Library __println(R1),Rdummy
+Move s,R2
+Library __stoa(R2),R2
+Move R2,sarr
+Move sarr,R4
+ArrayLength R4,R3
+Move R3,l
+Move l,R3
+Library __printi(R3),Rdummy
+Move l,R3
+Return R3

@@ -709,9 +709,11 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(MathUnaryOp unaryOp) {
+		target++;
 		unaryOp.getOperand().accept(this);
-		//emit("Mult -1,R"+target);
-		instructions.add(new UnaryOpInstr(registers.request(target), Operator.SUB));
+		target--;
+		instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
+		instructions.add(new BinOpInstr(registers.request(target+1), registers.request(target), Operator.SUB));
 		return null;
 	}
 
