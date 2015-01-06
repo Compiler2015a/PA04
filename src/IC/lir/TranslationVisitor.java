@@ -183,7 +183,7 @@ public class TranslationVisitor implements Visitor{
 
 	private Object visitMethod(Method method)
 	{
-		this.target = 0;
+		this.target = 1;
 		this.currentMethodKind = method.getSymbolsTable().getEntry(method.getName()).getKind();
 		// add method label
 		currentClassName = method.getSymbolsTable().getId();
@@ -515,8 +515,8 @@ public class TranslationVisitor implements Visitor{
 		case PLUS:
 			if(binaryOp.getFirstOperand().getEntryType().isStringType() && binaryOp.getSecondOperand().getEntryType().isStringType()){
 				List<Operand> args = new ArrayList<Operand>();
+				args.add(registers.request(target-1));
 				args.add(registers.request(target));
-				args.add(registers.request(target+1));
 				instructions.add(new LibraryCall(labelHandler.requestStr("__stringCat"), args, registers.request(target)));
 				return true;
 			} else {
@@ -561,7 +561,7 @@ public class TranslationVisitor implements Visitor{
 			target++;
 			binaryOp.getFirstOperand().accept(this);
 			//emit("Compare R,"+target+",R"+(--target));
-			instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
+			instructions.add(new CompareInstr(registers.request(--target), registers.request(target+1)));
 			//emit("JumpG _true_label"+labels);
 			instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.G));
 			//emit("Move 0,R"+target);
@@ -578,7 +578,7 @@ public class TranslationVisitor implements Visitor{
 			target++;
 			binaryOp.getFirstOperand().accept(this);
 			//emit("Compare R,"+target+",R"+(--target));
-			instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
+			instructions.add(new CompareInstr(registers.request(--target), registers.request(target+1)));
 			//emit("JumpGE _true_label"+labels);
 			instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.GE));
 			//emit("Move 0,R"+target);
@@ -597,7 +597,7 @@ public class TranslationVisitor implements Visitor{
 			target++;
 			binaryOp.getFirstOperand().accept(this);
 			//emit("Compare R,"+target+",R"+(--target));
-			instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
+			instructions.add(new CompareInstr(registers.request(--target), registers.request(target+1)));
 			//emit("JumpFalse _true_label"+labels);
 			instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.False));
 			//emit("Move 0,R"+target);
@@ -616,7 +616,7 @@ public class TranslationVisitor implements Visitor{
 			target++;
 			binaryOp.getFirstOperand().accept(this);
 			//emit("Compare R,"+target+",R"+(--target));
-			instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
+			instructions.add(new CompareInstr(registers.request(--target), registers.request(target+1)));
 			//emit("JumpFalse _false_label"+labels);
 			instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.FALSE_LABEL), Cond.False));
 			//emit("Move 1,R"+target);
@@ -635,7 +635,7 @@ public class TranslationVisitor implements Visitor{
 			target++;
 			binaryOp.getFirstOperand().accept(this);
 			//emit("Compare R,"+target+",R"+(--target));
-			instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
+			instructions.add(new CompareInstr(registers.request(--target), registers.request(target+1)));
 			//emit("JumpL _true_label"+labels);
 			instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.L));
 			//emit("Move 0,R"+target);
@@ -654,7 +654,7 @@ public class TranslationVisitor implements Visitor{
 			target++;
 			binaryOp.getFirstOperand().accept(this);
 			//emit("Compare R,"+target+",R"+(--target));
-			instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
+			instructions.add(new CompareInstr(registers.request(--target), registers.request(target+1)));
 			//emit("JumpLE _true_label"+labels);
 			instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.LE));
 			//emit("Move 0,R"+target);
@@ -678,7 +678,7 @@ public class TranslationVisitor implements Visitor{
 			binaryOp.getSecondOperand().accept(this);
 			//emit("And R"+target+",R"+(--target));
 			//emit(CommonLabels.END_LABEL.toString()+labels);
-			instructions.add(new BinOpInstr(registers.request(target), registers.request(--target), Operator.AND));
+			instructions.add(new BinOpInstr(registers.request(--target), registers.request(target+1), Operator.AND));
 			break;
 		case LOR:
 			binaryOp.getFirstOperand().accept(this);
@@ -690,7 +690,7 @@ public class TranslationVisitor implements Visitor{
 			binaryOp.getSecondOperand().accept(this);
 			//emit("Or R"+target+",R"+(--target));
 			//emit(CommonLabels.END_LABEL.toString()+labels);
-			instructions.add(new BinOpInstr(registers.request(target), registers.request(--target), Operator.OR));
+			instructions.add(new BinOpInstr(registers.request(--target), registers.request(target+1), Operator.OR));
 			instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
 			break;
 		default:
