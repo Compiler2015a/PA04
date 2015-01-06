@@ -465,6 +465,7 @@ public class TranslationVisitor implements Visitor{
 	
 	private void checkSizeGtZeroAndEmit(Operand size)
 	{
+		
 		instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
 		instructions.add(new MoveInstr(size, registers.request(target++)));
 		instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
