@@ -469,7 +469,7 @@ public class TranslationVisitor implements Visitor{
 		CommonLabels jumpingLabel = CommonLabels.END_LABEL;
 		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(jumpingLabel, ifLabel), Cond.False));
 		
-		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add("Runtime Error")), registers.request(target)));
+		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add("Runtime Error")), registers.request(target))); //TODO: messes up strings
 		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
 		paramOpRegs.add(new ParamOpPair(new Memory("s"), registers.request(target)));
 		instructions.add(new IC.lir.Instructions.StaticCall
