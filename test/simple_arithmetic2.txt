@@ -5,7 +5,7 @@ class A {
 		Library.println(Library.itos(foo(y+1)));
 	}
 	
-	int foo(int x) {
+	static int foo(int x) {
 		int a = x + 4;
 		return a * 2;
 	}

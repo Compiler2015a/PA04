@@ -25,6 +25,7 @@ public class SymbolsTableBuilder implements Visitor {
 	 * }
 	 */	
 	private IC.Types.Type currentMethodType; // for the return statement to have the method type
+	private IDSymbolsKinds currentMethodKind; // virtual or static
 	// which it returns value to.
 	
 	private TypeTable typeTable;
@@ -362,7 +363,10 @@ public class SymbolsTableBuilder implements Visitor {
 			methodEntry = getMethodSymbolEntry(call.getName(), IDSymbolsKinds.VIRTUAL_METHOD, this.currentClassSymbolTablePoint, false);
 		}
 		else {
-			methodEntry = getMethodSymbolEntry(call.getName(), null, call.getSymbolsTable(), true);
+			if (currentMethodKind == IDSymbolsKinds.STATIC_METHOD)
+				methodEntry = getMethodSymbolEntry(call.getName(), currentMethodKind, call.getSymbolsTable(), false);
+			else
+				methodEntry = getMethodSymbolEntry(call.getName(), null, call.getSymbolsTable(), true);
 		}
 		if(methodEntry == null) {
 			this.semanticErrorThrower = new SemanticErrorThrower(call.getLine(),
@@ -482,6 +486,7 @@ public class SymbolsTableBuilder implements Visitor {
 		SymbolTable currentMethodSymbolTable = method.getSymbolsTable().findChildSymbolTable(
 				method.getName());
 		this.currentMethodType = method.getEntryType();
+		this.currentMethodKind = currentMethodSymbolTable.getParentSymbolTable().getEntry(method.getName()).getKind();
 		for (Formal formal : method.getFormals()) {
 			formal.setSymbolsTable(currentMethodSymbolTable);
 			if (!(Boolean)formal.accept(this))

@@ -98,7 +98,7 @@ public class Compiler {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private static String getLibraryArgument(String args[]) {
 		for (int i=0; i<args.length; i++)
 			if(args[i].substring(0, 2).equals("-L"))
