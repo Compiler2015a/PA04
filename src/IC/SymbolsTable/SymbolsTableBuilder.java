@@ -486,7 +486,7 @@ public class SymbolsTableBuilder implements Visitor {
 		SymbolTable currentMethodSymbolTable = method.getSymbolsTable().findChildSymbolTable(
 				method.getName());
 		this.currentMethodType = method.getEntryType();
-		this.currentMethodKind = currentMethodSymbolTable.getParentSymbolTable().getEntry(method.getName()).getKind();
+		this.currentMethodKind = method.getSymbolsTable().getEntry(method.getName()).getKind();
 		for (Formal formal : method.getFormals()) {
 			formal.setSymbolsTable(currentMethodSymbolTable);
 			if (!(Boolean)formal.accept(this))

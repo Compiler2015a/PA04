@@ -45,6 +45,7 @@ import IC.AST.VirtualCall;
 import IC.AST.VirtualMethod;
 import IC.AST.Visitor;
 import IC.AST.While;
+import IC.SymbolsTable.IDSymbolsKinds;
 import IC.Types.Type;
 import IC.lir.Instructions.*;
 
@@ -82,6 +83,7 @@ public class TranslationVisitor implements Visitor{
 	private String currentClassName;
 	private Map<String, List<String>> methodFullNamesMap;	
 	private Instruction currentAssignmentInstruction;
+	private IDSymbolsKinds currentMethodKind; // virtual or static
 	
 	public TranslationVisitor() {
 		this.classLayouts = new HashMap<String,ClassLayout>();
@@ -182,6 +184,7 @@ public class TranslationVisitor implements Visitor{
 	private Object visitMethod(Method method)
 	{
 		this.target = 0;
+		this.currentMethodKind = method.getSymbolsTable().getEntry(method.getName()).getKind();
 		// add method label
 		currentClassName = method.getSymbolsTable().getId();
 		String methodFullName = classLayouts.get(currentClassName).getMethodString(method.getName());
@@ -196,7 +199,15 @@ public class TranslationVisitor implements Visitor{
 		for (Statement stmt : method.getStatements()) {
 			stmt.accept(this);
 		}
-
+		
+		if (method.getName().equals("main")) {
+			List<Operand> exitSinglOperandList = new ArrayList<Operand>();
+			exitSinglOperandList.add(new Immediate(0));
+			instructions.add(new LibraryCall(labelHandler.requestStr("__exit"), exitSinglOperandList, registers.request(-1)));
+		}
+		else if (method.getEntryType().getReturnType().isVoidType()) {
+			instructions.add(new ReturnInstr(registers.request(target)));
+		}
 		// if in non-returning function, add a dummy return
 		if (method.doesHaveFlowWithoutReturn())
 			//not sure about the value 
@@ -387,6 +398,13 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(VirtualCall call) {
+		if ((!call.isExternal()) && (currentMethodKind == IDSymbolsKinds.STATIC_METHOD)) {
+			StaticCall staticCall = new StaticCall(call.getLine(),
+					this.currentClassName, call.getName(), call.getArguments());
+			staticCall.setEntryType(call.getEntryType());
+			staticCall.setMethodType(call.getMethodType());
+			return staticCall.accept(this);
+		}
 		if (call.isExternal()) // TODO CHECK!!!!!!!!!!!
 			call.getLocation().accept(this);
 		Operand loadingOperand = call.isExternal() ? registers.request(target-1) : new Memory("this");
