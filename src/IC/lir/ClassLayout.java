@@ -59,6 +59,10 @@ public class ClassLayout {
 		return (fields.size() + 1) * 4; //4 bytes (32 bits) per field, + 4 bytes for DVPtr
 	}
 	
+	public int getFieldIndex(String fieldName) {
+		return fields.indexOf(fieldName) + 1;
+	}
+	
 	public int getMethodIndex(String methodName) {
 		int i = 0;
 		for (MethodStrc methodStrc : methods) {

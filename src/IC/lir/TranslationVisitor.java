@@ -81,6 +81,8 @@ public class TranslationVisitor implements Visitor{
 	private Stack<String> _endWhileLabelStack;
 	private String currentClassName;
 	private Map<String, List<String>> methodFullNamesMap;	
+	private Instruction currentAssignmentInstruction;
+	
 	public TranslationVisitor() {
 		this.classLayouts = new HashMap<String,ClassLayout>();
 		this.stringLiterals = new StringLiterals(); //there is also a StringLiteral class in the Instructions package. Replace?? (Answer: no, I fixed it to use that class, it's OK)
@@ -95,6 +97,7 @@ public class TranslationVisitor implements Visitor{
 		
 		this.methodFullNamesMap = new HashMap<String, List<String>>();
 		this.nodeHandlingQueue = new LinkedList<ASTNode>();
+		
 	}
 
 	public void printInstructions() {
@@ -229,9 +232,8 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(Assignment assignment) {
 		assignment.getAssignment().accept(this);
-		instructions.add(new MoveInstr(registers.request(target), new Memory(((VariableLocation)assignment.getVariable()).getName()))); //TODO: what if variable is external?
-		
-		
+		assignment.getVariable().accept(this);
+		instructions.add(currentAssignmentInstruction);
 		return null;
 	}
 
@@ -323,10 +325,19 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(VariableLocation location) {
 		if (location.isExternal()) {
-			// TODO ???
+			location.getLocation().accept(this);
+			
+			String externalClsName = location.getLocation().getEntryType().toString();
+			int fieldIndex = this.classLayouts.get(externalClsName).getFieldIndex(location.getName());
+			currentAssignmentInstruction = new MoveFieldInstr(registers.request(target), new Immediate(fieldIndex), registers.request(target - 1), false); 
+			instructions.add(new MoveFieldInstr(registers.request(target), new Immediate(fieldIndex), registers.request(target), true));
 		}
-		Memory locationMemory = new Memory(location.getName());
-		instructions.add(new MoveInstr(locationMemory, registers.request(target)));
+		else {
+			Memory locationMemory = new Memory(location.getName());
+			currentAssignmentInstruction = new MoveInstr(registers.request(target), locationMemory);
+			instructions.add(new MoveInstr(locationMemory, registers.request(target)));
+
+		}
 		return null;
 	}
 
@@ -360,7 +371,7 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(VirtualCall call) {
 		String clsName = call.isExternal() ?
-				call.getLocation().getEntryType().getName() : this.currentClassName;
+				call.getLocation().getEntryType().toString() : this.currentClassName;
 		int clsTarget = target;
 		instructions.add(new MoveFieldInstr(registers.request(clsTarget), new Immediate(0), 
 				new Memory(classLayouts.get(clsName).getClassName()), false)); //TODO probably should be removed but where to update if necessary?
@@ -700,7 +711,7 @@ public class TranslationVisitor implements Visitor{
 		default:
 
 		}
-
+		target++;
 		return null; 
 	}
 

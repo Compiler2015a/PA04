@@ -1,17 +1,17 @@
 class A {
+	D d;
 	static void main(string[] args) { 
-		C c = new C();
-		c.foo1(2);
 	}
-	int f0;
-	int foo1(int x) { return 0; }
+	
+	void foo() {
+		d.c.x = 5;
+	}
 }
 
-class B extends A {
-	int f1;
-	int foo2(int x) { return 1; }
+class C {
+	int x;
 }
 
-class C extends B {
-	int foo1(int x) { return 0; }
+class D {
+	C c;
 }

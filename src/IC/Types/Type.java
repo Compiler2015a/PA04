@@ -189,7 +189,7 @@ class ClassType extends Type
 
 	public ClassType(String clsName, ClassType superClassType)
 	{
-		super(clsName);
+		super("ClassType");
 		this.clsName = clsName;
 		this.superClassType = superClassType;
 	}

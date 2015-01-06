@@ -308,9 +308,9 @@ public class SymbolsTableBuilder implements Visitor {
 						"variable " + location.getName() + " is not initialized");
 				return false;
 			}
-			if (varEntry.getType().isClassType()) 
-				this.currentClassSymbolTablePoint = this.rootSymbolTable.findChildSymbolTable(varEntry.getType().toString());	
 		}
+		if (varEntry.getType().isClassType()) 
+			this.currentClassSymbolTablePoint = this.rootSymbolTable.findChildSymbolTable(varEntry.getType().toString());	
 		location.setEntryType(varEntry.getType());;
 		return true;
 	}

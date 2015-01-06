@@ -128,10 +128,9 @@ public class SymbolTable {
 	  }
 	  
 	  private SymbolTable findChildSymbolTableRecursive(SymbolTable root, String id) {
-		  for (String tableID : root.children.keySet()) {
-			  if (id.equals(tableID))
-				  return root.children.get(id);
-		  }
+		  if (root.children.containsKey(id))
+			  return root.children.get(id);
+
 		  for (String tableID : root.children.keySet()) {
 			  SymbolTable result = findChildSymbolTableRecursive(
 						root.children.get(tableID), id);
