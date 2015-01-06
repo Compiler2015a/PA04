@@ -1,0 +1,63 @@
+class IFS { 
+
+	static void main (string[] args) { 
+		int x = 12 ; 
+		int y = 8 ; 
+		string res = ""; 
+		
+		if ( x < y ) { 
+			if ( (x + y) > (x * y) ) { 
+				if ( (x % y) == 3 ) { 
+					res = "TTT" ; 
+				} 
+				else res = "TTF" ; 
+			} 
+			else if ( (x % y) == 3 )  
+				 	res = "TFT" ; 
+				 else res = "TFF" ; 				
+		}
+		else { 
+			if ( (x + y) > (x * y) ) { 
+				if ( (x % y) == 3 ) { 
+					res = "FTT" ; 
+				} 
+				else res = "FTF" ;
+			} 
+			else if ( (x % y) == 3 ) 
+					res = "FFT" ; 
+				 else res = "FFF" ; 				
+		}
+		// should be FFF
+		
+		Library.println(res) ; 
+
+		x = 3;
+
+		if ( x < y ) { 
+			if ( (x + y) > (x * y) ) { 
+				if ( (x % y) == 3 ) { 
+					res = "TTT" ; 
+				} 
+				else res = "TTF" ; 
+			} 
+			else if ( (x % y) == 3 )  
+				 	res = "TFT" ; 
+				 else res = "TFF" ; 				
+		}
+		else { 
+			if ( (x + y) > (x * y) ) { 
+				if ( (x % y) == 3 ) { 
+					res = "FTT" ; 
+				} 
+				else res = "FTF" ;
+			} 
+			else if ( (x % y) == 3 ) 
+					res = "FFT" ; 
+				 else res = "FFF" ; 				
+	    }
+		// should be TFT
+		
+		Library.println(res) ; 
+	}
+}
+

@@ -188,7 +188,7 @@ public class TranslationVisitor implements Visitor{
 		currentClassName = method.getSymbolsTable().getId();
 		String methodFullName = classLayouts.get(currentClassName).getMethodString(method.getName());
 		//emit(fullMethodName+":");
-		instructions.add(new LabelInstr(labelHandler.requestStr(methodFullName+":")));
+		instructions.add(new LabelInstr(labelHandler.requestStr(methodFullName)));
 		
 		// add new registers for this method
 		//    _registers = new HashMap<>();
@@ -696,7 +696,7 @@ public class TranslationVisitor implements Visitor{
 	public Object visit(Literal literal) {
 		switch(literal.getType()) {
 		case STRING:
-			emit("Move str"+stringLiterals.add((String)literal.getValue())+",R"+target); 
+			//emit("Move str"+stringLiterals.add((String)literal.getValue())+",R"+target); 
 			instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add((String)literal.getValue())), registers.request(target)));
 			break;
 		case INTEGER:

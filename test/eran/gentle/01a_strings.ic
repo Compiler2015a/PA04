@@ -1,0 +1,44 @@
+class IFS { 
+
+	static void main (string[] args) { 
+		string a = "a";
+		string b = "b";
+		string c = "c";
+
+		Library.println(a);  // "a"
+		Library.println(a + b);  // "ab"
+		Library.println(c + b + a); // "cba"
+
+		if (len(a + b) == len("ab")) {
+		 Library.println("equals1");
+		}
+		if (len("ab") == len("ab")) {
+		 Library.println("equals2");
+		}
+		string ab = a + b;
+		if (len(ab) == len("ab")) {
+		 Library.println("equals3");
+		}
+		string abab = ab;
+		if (abab == ab) {
+		 Library.println("equals4");
+		}
+
+		if (len(a + c) == len("acb")) {
+		 Library.println("not equals (should not be printed)");
+		}
+
+		int i = 0;
+		while (i < 3) {
+		 a = a + a;
+		 i = i + 1;
+		}
+		Library.println(a);  // "aaaaaaaa" (8 times)
+
+	}
+	
+	static int len(string s) {
+		return Library.stoa(s).length;
+	}
+}
+

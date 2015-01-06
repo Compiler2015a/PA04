@@ -1,0 +1,29 @@
+class IFS { 
+
+	static void main (string[] args) { 
+		int x = 1 ; 
+		int y = 20 ; 
+		string res ;
+
+		// should print "2 4 6 8 10 12 14 16 18 20\n"
+		while ( x < 11 ) {
+		  Library.printi(x * 2);
+		  Library.print(" ");
+		  x = x + 1;
+		}
+		Library.println("");
+
+		// should print "*\n**\n***\n****\n*****\n"
+		x = 1;
+		while ( x <= 5) {
+		 y = 1;
+		 while (y <= x) {
+		  Library.print("*");
+		  y = y + 1;
+		 }
+		 Library.println("");
+		 x = x + 1;
+		}
+	}
+}
+

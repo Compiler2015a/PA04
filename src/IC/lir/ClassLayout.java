@@ -119,7 +119,7 @@ public class ClassLayout {
 		
 		@Override
 		public String toString() {
-			return "_" + clsName + "_" + methodName;
+			return /*"_" + */clsName + "_" + methodName;
 		}
 	}
 }
