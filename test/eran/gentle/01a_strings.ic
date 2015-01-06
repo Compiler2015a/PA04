@@ -1,5 +1,5 @@
 class IFS { 
-
+	
 	static void main (string[] args) { 
 		string a = "a";
 		string b = "b";
