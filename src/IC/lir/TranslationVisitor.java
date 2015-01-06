@@ -205,7 +205,9 @@ public class TranslationVisitor implements Visitor{
 			exitSinglOperandList.add(new Immediate(0));
 			instructions.add(new LibraryCall(labelHandler.requestStr("__exit"), exitSinglOperandList, registers.request(-1)));
 		}
-
+		else if (method.getEntryType().getReturnType().isVoidType()) {
+			instructions.add(new ReturnInstr(registers.request(target))); //TODO check!! specially, the register fits. 
+		}
 		// if in non-returning function, add a dummy return
 		if (method.doesHaveFlowWithoutReturn())
 			//not sure about the value 
