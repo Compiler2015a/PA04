@@ -336,7 +336,7 @@ public class SymbolsTableBuilder implements Visitor {
 					"the class " + call.getClassName() + " dosen't exist");
 			return false;
 		}
-		SymbolEntry methodEntry = getMethodSymbolEntry(call.getName(), IDSymbolsKinds.STATIC_METHOD, clsSymbolTable);
+		SymbolEntry methodEntry = getMethodSymbolEntry(call.getName(), IDSymbolsKinds.STATIC_METHOD, clsSymbolTable, false);
 		if(methodEntry == null) {
 			this.semanticErrorThrower = new SemanticErrorThrower(call.getLine(),
 					"the method " + call.getName() + " dosen't exist");
@@ -359,11 +359,11 @@ public class SymbolsTableBuilder implements Visitor {
 			call.getLocation().setSymbolsTable(call.getSymbolsTable());
 			if (!(Boolean)call.getLocation().accept(this))
 				return false;
-			methodEntry = getMethodSymbolEntry(call.getName(), IDSymbolsKinds.VIRTUAL_METHOD, this.currentClassSymbolTablePoint);
+			methodEntry = getMethodSymbolEntry(call.getName(), IDSymbolsKinds.VIRTUAL_METHOD, this.currentClassSymbolTablePoint, false);
 		}
-		else 
-			methodEntry = getMethodSymbolEntry(call.getName(), IDSymbolsKinds.VIRTUAL_METHOD, call.getSymbolsTable());
-
+		else {
+			methodEntry = getMethodSymbolEntry(call.getName(), null, call.getSymbolsTable(), true);
+		}
 		if(methodEntry == null) {
 			this.semanticErrorThrower = new SemanticErrorThrower(call.getLine(),
 					"the method " + call.getName() + " dosen't exist");
@@ -569,12 +569,16 @@ public class SymbolsTableBuilder implements Visitor {
 		return null;
 	}
 	
-	private SymbolEntry getMethodSymbolEntry(
-			String name, IDSymbolsKinds methodKind, SymbolTable bottomClassSymbolTable) {
+	private SymbolEntry getMethodSymbolEntry(String name, 
+			IDSymbolsKinds methodKind, SymbolTable bottomClassSymbolTable, Boolean ignoreMethodKind) {
 		while (bottomClassSymbolTable != null) {
-			if (bottomClassSymbolTable.hasEntry(name))
-				if (bottomClassSymbolTable.getEntry(name).getKind() == methodKind)
+			if (bottomClassSymbolTable.hasEntry(name)) {
+				SymbolEntry candidateEntry = bottomClassSymbolTable.getEntry(name);
+				Boolean existanceCondition = ignoreMethodKind ? candidateEntry.getKind().isMethodKind() :
+					candidateEntry.getKind() == methodKind;
+				if (existanceCondition)
 					return bottomClassSymbolTable.getEntry(name);
+			}
 			bottomClassSymbolTable = bottomClassSymbolTable.getParentSymbolTable();
 		}
 		return null;
