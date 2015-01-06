@@ -23,7 +23,7 @@ public class StringLiterals {
 	public int add(String s) {
 		if(!literals.contains(s)) {
 			literals.add(s);
-			StringLiteral sl = new StringLiteral("str "+literals.indexOf(s),"\""+ s+"\"");
+			StringLiteral sl = new StringLiteral("str"+literals.indexOf(s),"\""+ s+"\"");
 			sl.assignAddress(literals.indexOf(s));
 			sLiterals.add(sl);
 		}

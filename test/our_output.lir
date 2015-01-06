@@ -1,13 +1,14 @@
-str0: a
-str1: b
-str2: c
-str3: ab
-str4: equals1
-str5: equals2
-str6: equals3
-str7: equals4
-str8: acb
-str9: not equals (should not be printed)
+
+str 0: "a"
+str 1: "b"
+str 2: "c"
+str 3: "ab"
+str 4: "equals1"
+str 5: "equals2"
+str 6: "equals3"
+str 7: "equals4"
+str 8: "acb"
+str 9: "not equals (should not be printed)"
 _DV_Library: [__DV_Library_println,__DV_Library_print,__DV_Library_printi,__DV_Library_printb,__DV_Library_readi,__DV_Library_readln,__DV_Library_eof,__DV_Library_stoi,__DV_Library_itos,__DV_Library_stoa,__DV_Library_atos,__DV_Library_random,__DV_Library_time,__DV_Library_exit]
 _DV_IFS: [_ic_main,__DV_IFS_len]
 _ic_main:
