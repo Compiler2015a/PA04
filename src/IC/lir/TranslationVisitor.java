@@ -229,6 +229,7 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(Assignment assignment) {
 		assignment.getAssignment().accept(this);
+		target++;
 		assignment.getVariable().accept(this);
 		instructions.add(currentAssignmentInstruction);
 		return null;
@@ -327,12 +328,12 @@ public class TranslationVisitor implements Visitor{
 			
 			String externalClsName = location.getLocation().getEntryType().toString();
 			int fieldIndex = this.classLayouts.get(externalClsName).getFieldIndex(location.getName());
-			currentAssignmentInstruction = new MoveFieldInstr(registers.request(target), new Immediate(fieldIndex), registers.request(target - 1), false); 
+			currentAssignmentInstruction = new MoveFieldInstr(registers.request(target-1), new Immediate(fieldIndex), registers.request(target - 1), false); 
 			instructions.add(new MoveFieldInstr(registers.request(target), new Immediate(fieldIndex), registers.request(target), true));
 		}
 		else {
 			Memory locationMemory = new Memory(location.getName());
-			currentAssignmentInstruction = new MoveInstr(registers.request(target), locationMemory);
+			currentAssignmentInstruction = new MoveInstr(registers.request(target-1), locationMemory);
 			instructions.add(new MoveInstr(locationMemory, registers.request(target)));
 
 		}
@@ -347,7 +348,7 @@ public class TranslationVisitor implements Visitor{
 		target--;
 		location.getIndex().accept(this);
 		currentAssignmentInstruction = new MoveArrayInstr(
-				registers.request(target+1), registers.request(target), 
+				registers.request(target-1), registers.request(target), // TODO check~!
 				registers.request(assignmentTarget), false);
 		instructions.add(new MoveArrayInstr(registers.request(target+1), registers.request(target), registers.request(target), false));
 		return null;
@@ -399,8 +400,10 @@ public class TranslationVisitor implements Visitor{
 			staticCall.setMethodType(call.getMethodType());
 			return staticCall.accept(this);
 		}
-		if (call.isExternal()) // TODO CHECK!!!!!!!!!!!
+		if (call.isExternal()) {// TODO CHECK!!!!!!!!!!!
+			target++;
 			call.getLocation().accept(this);
+		}
 		Operand loadingOperand = call.isExternal() ? registers.request(target-1) : new Memory("this");
 		int clsTarget = target;
 		
