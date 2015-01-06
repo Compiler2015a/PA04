@@ -1,7 +1,12 @@
 class IFS { 
 	
 	static void main (string[] args) { 
-		Library.println("a" + "b");  // "a"
+		string a = "a";
+		int i = 0;
+		while (i < 3) {
+			 a = a + a;
+			 i = i + 1;
+		}
+		Library.println(a);  // "aaaaaaaa" (8 times)
 	}
-	
 }

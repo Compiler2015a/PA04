@@ -1,0 +1,7 @@
+class A {
+
+	static void main (string[] args) { 
+		 if (3 > 2)
+			Library.println("indeed");
+	}
+}

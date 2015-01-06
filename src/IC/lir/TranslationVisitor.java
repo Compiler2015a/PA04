@@ -312,9 +312,9 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(LocalVariable localVariable) {
 		if (localVariable.hasInitValue()) {
-			target++;
 			localVariable.getInitValue().accept(this);
 			instructions.add(new MoveInstr(registers.request(target), new Memory(localVariable.getName())));
+			target++;
 		}
 		// TODO what if there isn't an init value???
 		return null;
@@ -603,7 +603,7 @@ public class TranslationVisitor implements Visitor{
 			//emit("Compare R,"+target+",R"+(--target));
 			instructions.add(new CompareInstr(registers.request(--target), registers.request(target+1)));
 			//emit("JumpFalse _true_label"+labels);
-			instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.False));
+			instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.True));
 			//emit("Move 0,R"+target);
 			instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
 			//emit("Jump _end_label"+labels);
@@ -622,15 +622,15 @@ public class TranslationVisitor implements Visitor{
 			//emit("Compare R,"+target+",R"+(--target));
 			instructions.add(new CompareInstr(registers.request(--target), registers.request(target+1)));
 			//emit("JumpFalse _false_label"+labels);
-			instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.FALSE_LABEL), Cond.False));
+			instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.False));
 			//emit("Move 1,R"+target);
-			instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
+			instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
 			//emit("Jump _end_label"+labels);
 			instructions.add(new JumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
 			//emit(CommonLabels.FALSE_LABEL.toString()+labels);
-			instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.FALSE_LABEL)));
+			instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL)));
 			//emit("Move 0,R"+target);
-			instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
+			instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
 			//emit(CommonLabels.END_LABEL.toString()+labels);
 			instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
 			break;
