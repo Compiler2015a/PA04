@@ -343,7 +343,13 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(ArrayLocation location) {
-		// TODO Auto-generated method stub
+		//TODO: can an ArrayLocation be external?
+		target++;
+		location.getArray().accept(this);
+		target--;
+		location.getIndex().accept(this);
+		
+		instructions.add(new MoveArrayInstr(registers.request(target+1), registers.request(target), registers.request(target), false));
 		return null;
 	}
 
