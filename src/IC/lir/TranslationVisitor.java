@@ -63,12 +63,13 @@ public class TranslationVisitor implements Visitor{
 			"Runtime error: Null pointer dereference!",
 			"Runtime error: Array index out of bounds!",
 			"Runtime error: Array allocation with negative array size!",
-			"Runtime error: Division by zero!"
+			"Runtime error: Division by zero!",
+			"Attempt to return from the main function!" //TODO: implement this
 	};
 	Map<String,Integer> arrs;
-	
+
 	private boolean assignmentCall = false;
-	
+
 	private Queue<ASTNode> nodeHandlingQueue;
 	// registers
 	//private Map<String, Integer> _registers;
@@ -81,7 +82,7 @@ public class TranslationVisitor implements Visitor{
 	private String currentClassName;
 	private Map<String, List<String>> methodFullNamesMap;	
 	private IDSymbolsKinds currentMethodKind; // virtual or static
-	
+
 	public TranslationVisitor() {
 		this.classLayouts = new HashMap<String,ClassLayout>();
 		this.stringLiterals = new StringLiterals(); //there is also a StringLiteral class in the Instructions package. Replace?? (Answer: no, I fixed it to use that class, it's OK)
@@ -93,7 +94,7 @@ public class TranslationVisitor implements Visitor{
 
 		this._whileLabelStack = new Stack<String>();
 		this._endWhileLabelStack = new Stack<String>();
-		
+
 		this.methodFullNamesMap = new HashMap<String, List<String>>();
 		this.nodeHandlingQueue = new LinkedList<ASTNode>();
 		this.arrs = new HashMap<String,Integer>();
@@ -103,12 +104,12 @@ public class TranslationVisitor implements Visitor{
 		//print string literals
 		for(StringLiteral sl : stringLiterals.toStringLiteralList())
 			System.out.println(sl.toString());
-		
+
 		//print dispatch tables
 		for(ClassLayout cl : classLayouts.values()) {
 			System.out.println(cl);
 		}
-		
+
 		//print instructions
 		for (Instruction inst : instructions)
 			System.out.println(inst.toString());
@@ -125,12 +126,12 @@ public class TranslationVisitor implements Visitor{
 		}
 		instructions.add(new LabelInstr(labelHandler.requestStr("_PROGRAM_END")));
 	}
-	
+
 	@Override
 	public Object visit(Program program) {
 		for (ICClass iccls : program.getClasses()) 
 			nodeHandlingQueue.add(iccls);
-		
+
 		return null;
 	}
 
@@ -138,22 +139,22 @@ public class TranslationVisitor implements Visitor{
 	public Object visit(ICClass icClass) {
 		ClassLayout superCl = icClass.hasSuperClass() ? 
 				classLayouts.get(icClass.getSuperClassName()) : null;
-		ClassLayout cl = new ClassLayout(icClass.getName(), superCl);
+				ClassLayout cl = new ClassLayout(icClass.getName(), superCl);
 
-		for (Field field : icClass.getFields()) {
-			field.accept(this);
-			cl.addField(field.getName());
-		}
-		
-		for (Method method : icClass.getMethods()) {
-			nodeHandlingQueue.add(method);
-			cl.addMethod(method.getName());
-			String methodFullName = cl.getMethodString(method.getName());
-			this.methodFullNamesMap.put(methodFullName, generatMethodParamsList(method));
-		}
-		if(!icClass.getName().equals("Library"))
-			classLayouts.put(icClass.getName(), cl);
-		return null;
+				for (Field field : icClass.getFields()) {
+					field.accept(this);
+					cl.addField(field.getName());
+				}
+
+				for (Method method : icClass.getMethods()) {
+					nodeHandlingQueue.add(method);
+					cl.addMethod(method.getName());
+					String methodFullName = cl.getMethodString(method.getName());
+					this.methodFullNamesMap.put(methodFullName, generatMethodParamsList(method));
+				}
+				if(!icClass.getName().equals("Library"))
+					classLayouts.put(icClass.getName(), cl);
+				return null;
 	}
 
 	@Override
@@ -188,16 +189,16 @@ public class TranslationVisitor implements Visitor{
 		String methodFullName = classLayouts.get(currentClassName).getMethodString(method.getName());
 		//emit(fullMethodName+":");
 		instructions.add(new LabelInstr(labelHandler.requestStr(methodFullName)));
-		
+
 		// add new registers for this method
 		//    _registers = new HashMap<>();
 		_nextRegisterNum = 0;
-		
+
 		// add all statements
 		for (Statement stmt : method.getStatements()) {
 			stmt.accept(this);
 		}
-		
+
 		if (method.getName().equals("main")) {
 			List<Operand> exitSinglOperandList = new ArrayList<Operand>();
 			exitSinglOperandList.add(new Immediate(0));
@@ -236,7 +237,7 @@ public class TranslationVisitor implements Visitor{
 		//target--;
 		return null;
 	}
-	
+
 
 	@Override
 	public Object visit(CallStatement callStatement) {
@@ -246,14 +247,18 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(Return returnStatement) {
-		returnStatement.getValue().accept(this);
-		instructions.add(new ReturnInstr(registers.request(target)));
+		if(returnStatement.hasValue()) {
+			returnStatement.getValue().accept(this);
+			instructions.add(new ReturnInstr(registers.request(target)));
+		} else {
+			instructions.add(new ReturnInstr(registers.request(-1)));
+		}
 		return null;
 	}
 
 	@Override
 	public Object visit(If ifStatement) {
-		
+
 		ifStatement.getCondition().accept(this);
 		labelHandler.increaseLabelsCounter();
 		int ifLabel = labelHandler.getLabelsCounter();
@@ -305,7 +310,7 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(StatementsBlock statementsBlock) {
-		
+
 		for(Statement stmnt : statementsBlock.getStatements())
 		{
 			stmnt.accept(this);
@@ -335,7 +340,7 @@ public class TranslationVisitor implements Visitor{
 			int fieldIndex = this.classLayouts.get(externalClsName).getFieldIndex(location.getName());
 			if(assignmentCall)
 				instructions.add(new MoveFieldInstr(registers.request(target), new Immediate(fieldIndex), registers.request(target+1), false)); 
-			
+
 			instructions.add(new MoveFieldInstr(registers.request(target), new Immediate(fieldIndex), registers.request(target), true));
 		}
 		else {
@@ -350,40 +355,40 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(ArrayLocation location) {
-		
+
 		//System.out.println("555 "+location.);
 		//a: ((VariableLocation)location.getArray()).getName()
 		//11: ((Literal)location.getIndex()).getValue()
 		for(Integer cl : arrs.values()) {
 			System.out.println(cl);
 		}
-		
+
 		int assignmentTarget = target;
 		target+=3;
-		
+
 		boolean tmp = assignmentCall;
 		assignmentCall = false;
 		location.getArray().accept(this);
 		target--;
 		location.getIndex().accept(this);
 		assignmentCall = tmp;
-		
+
 		// check if index > length
 		checkGTLengthAndEmit(registers.request(target),registers.request(target+1));
-		
+
 		if(assignmentCall)
-		/*currentAssignmentInstruction =*/instructions.add( new MoveArrayInstr(
-				registers.request(target+1), registers.request(target), // TODO check~!
-				registers.request(assignmentTarget+1), false));
+			/*currentAssignmentInstruction =*/instructions.add( new MoveArrayInstr(
+					registers.request(target+1), registers.request(target), // TODO check~!
+					registers.request(assignmentTarget+1), false));
 		instructions.add(new MoveArrayInstr(registers.request(target+1), registers.request(target), registers.request(/*--target*/assignmentTarget), true));
 
 		target=assignmentTarget;
-		
-		
-		
+
+
+
 		return null;
 	}
-	
+
 	private void checkGTLengthAndEmit(Reg index,Reg array)
 	{
 		target++;
@@ -398,18 +403,18 @@ public class TranslationVisitor implements Visitor{
 		instructions.add(new LibraryCall(labelHandler.requestStr("__print"), args, new Reg("Rdummy")));
 		instructions.add(new JumpInstr(labelHandler.requestStr("_PROGRAM_END")));
 		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter)));
-	
+
 		_hasErrors[1] = true;
 	}
 
 	@Override
 	public Object visit(StaticCall call) {
-		
+
 		int unusedMethodTarget = target;
 		//library method call		
 		if (call.getClassName().equals("Library")) {
 			List<Operand> operands = new ArrayList<Operand>();
-			
+
 			for (Expression arg : call.getArguments()) {
 				arg.accept(this);
 				operands.add(registers.request(target));
@@ -425,7 +430,7 @@ public class TranslationVisitor implements Visitor{
 			List<String> methodParams = this.methodFullNamesMap.get(staticCallMethodFullName);
 			int i = 0;
 			for (Expression arg : call.getArguments()) {
-				
+
 				arg.accept(this);
 				paramOpRegs.add(new ParamOpPair(new Memory(methodParams.get(i)), registers.request(target)));
 				i++;
@@ -455,33 +460,33 @@ public class TranslationVisitor implements Visitor{
 		}
 		Operand loadingOperand = call.isExternal() ? registers.request(target-1) : new Memory("this");
 		int clsTarget = target;
-		
+
 		instructions.add(new MoveInstr(loadingOperand, registers.request(target)));
-		
+
 		//check if the ref is null
 		checkNullRefAndEmit(registers.request(target));
-		
+
 		String clsName = call.isExternal() ?
 				call.getLocation().getEntryType().toString() : this.currentClassName;
-		int unusedMethodTarget = target;
-		target++;
-		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
-		String virtualCallMethodFullName = classLayouts.get(clsName).getMethodString(call.getName());
-		List<String> methodParams = this.methodFullNamesMap.get(virtualCallMethodFullName);
-		int i = 0;
-		for (Expression arg : call.getArguments()) {
-			arg.accept(this);
-			paramOpRegs.add(new ParamOpPair(new Memory(methodParams.get(i)), registers.request(target)));
-			i++;
-			target++;
-		}
-		Immediate funcIndex = new Immediate(classLayouts.get(clsName).getMethodIndex(call.getName()));
-		target = unusedMethodTarget;
-		int retTrarget = call.getMethodType().getReturnType().isVoidType() ? -1 : target;
-		instructions.add(new IC.lir.Instructions.VirtualCall(
-				registers.request(clsTarget), funcIndex, paramOpRegs, registers.request(retTrarget)));
-		
-		return null;
+				int unusedMethodTarget = target;
+				target++;
+				List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
+				String virtualCallMethodFullName = classLayouts.get(clsName).getMethodString(call.getName());
+				List<String> methodParams = this.methodFullNamesMap.get(virtualCallMethodFullName);
+				int i = 0;
+				for (Expression arg : call.getArguments()) {
+					arg.accept(this);
+					paramOpRegs.add(new ParamOpPair(new Memory(methodParams.get(i)), registers.request(target)));
+					i++;
+					target++;
+				}
+				Immediate funcIndex = new Immediate(classLayouts.get(clsName).getMethodIndex(call.getName()));
+				target = unusedMethodTarget;
+				int retTrarget = call.getMethodType().getReturnType().isVoidType() ? -1 : target;
+				instructions.add(new IC.lir.Instructions.VirtualCall(
+						registers.request(clsTarget), funcIndex, paramOpRegs, registers.request(retTrarget)));
+
+				return null;
 	}
 
 	@Override
@@ -502,32 +507,32 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(NewArray newArray) {
-		
+
 		List<Operand> args = new ArrayList<Operand>();
 		target++;
-		
+
 		newArray.getSize().accept(this); 
 		instructions.add(new BinOpInstr(new Immediate(4), registers.request(target), Operator.MUL)); //multiply size by 4
 		args.add(registers.request(target--));
-		
+
 		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateArray"), args, registers.request(target)));
-		
-        // check if array size is non-negative
+
+		// check if array size is non-negative
 		checkSizeGtZeroAndEmit(args.get(0));
-		
+
 		return true;
 	}
-	
+
 	private void checkSizeGtZeroAndEmit(Operand size)
 	{
-		
+
 		/*Compare 0, size
 		JumpGTE _END_LABEL
 		Move "error", Rtarget
 		Library __print(Rtarget),Rdummy
 		Jump PROGRAM_END
 		_END_LABEL: */
-		
+
 		int labelCounter = labelHandler.increaseLabelsCounter();
 		instructions.add(new CompareInstr(new Immediate(0), size));
 		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter), Cond.GE));
@@ -537,7 +542,7 @@ public class TranslationVisitor implements Visitor{
 		instructions.add(new LibraryCall(labelHandler.requestStr("__print"), args, new Reg("Rdummy")));
 		instructions.add(new JumpInstr(labelHandler.requestStr("_PROGRAM_END")));
 		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter)));
-	
+
 		_hasErrors[2] = true;
 	}
 
@@ -549,28 +554,28 @@ public class TranslationVisitor implements Visitor{
 		Object o=length.getArray();
 		//emit("ArrayLength R"+(target+1)+",R"+target);
 		instructions.add(new ArrayLengthInstr(registers.request(target+1), registers.request(target)));
-		
+
 		// check if null
 		checkNullRefAndEmit(registers.request(target));
-		
+
 		return null;
 	}
-	
+
 	private void checkNullRefAndEmit(Reg reg)
 	{
 		int labelCounter = labelHandler.increaseLabelsCounter();
-        instructions.add(new CompareInstr(new Immediate(0), reg));
-        instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter), Cond.False));
-        instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[0])), registers.request(target)));
-        List<Operand> args = new ArrayList<Operand>();
-        args.add(registers.request(target));
-        instructions.add(new LibraryCall(labelHandler.requestStr("__print"), args , new Reg("Rdummy")));
-        instructions.add(new JumpInstr(labelHandler.requestStr("_PROGRAM_END")));
-        instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter)));
-	
-        _hasErrors[0] = true;
+		instructions.add(new CompareInstr(new Immediate(0), reg));
+		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter), Cond.False));
+		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[0])), registers.request(target)));
+		List<Operand> args = new ArrayList<Operand>();
+		args.add(registers.request(target));
+		instructions.add(new LibraryCall(labelHandler.requestStr("__print"), args , new Reg("Rdummy")));
+		instructions.add(new JumpInstr(labelHandler.requestStr("_PROGRAM_END")));
+		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter)));
+
+		_hasErrors[0] = true;
 	}
-	
+
 
 	@Override
 	public Object visit(MathBinaryOp binaryOp) {
@@ -614,11 +619,11 @@ public class TranslationVisitor implements Visitor{
 		//emit(instruction+" R"+target+",R"+(--target));
 		Reg leftReg=registers.request(target);
 		Reg rightReg=registers.request(--target);
-		
+
 		//zero division check
 		if(binaryOp.getOperator()==IC.BinaryOps.DIVIDE || binaryOp.getOperator()==IC.BinaryOps.MOD)
 			divisionCheck(leftReg);
-		
+
 		instructions.add(new BinOpInstr(leftReg, rightReg, op));
 		return true;
 	}
@@ -841,58 +846,58 @@ public class TranslationVisitor implements Visitor{
 	{
 		return this.emitted.toString();
 	}
-	
+
 	private List<String> generatMethodParamsList(Method method) {
 		List<String> output = new ArrayList<String>();
 		for (Formal formal : method.getFormals()) 
 			output.add(formal.getName());
 		return output;
 	}
-	
+
 	private void divisionCheck(Reg reg) {
-        _hasErrors[3] = true;
-//        target+=2;
-//        instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
-//		instructions.add(new MoveInstr(reg, registers.request(++target)));
-//		instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
-//		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.False));
-//		instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
-//		instructions.add(new JumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
-//		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL)));
-//		instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
-//		
-//		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
-//
-//		labelHandler.increaseLabelsCounter();
-//		int ifLabel = labelHandler.getLabelsCounter();
-//		instructions.add(new CompareInstr(new Immediate(1), registers.request(target)));
-//		CommonLabels jumpingLabel = CommonLabels.END_LABEL;
-//		
-//		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(jumpingLabel, ifLabel), Cond.False));
-//		
-//		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[3])), registers.request(target)));
-//		//List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
-//		//paramOpRegs.add(new ParamOpPair(new Memory("s"), registers.request(target)));
-//		//instructions.add(new IC.lir.Instructions.StaticCall
-//		//		(labelHandler.requestStr("Library_print"), paramOpRegs, registers.request(-1)));
-//		List<Operand> args = new ArrayList<Operand>();
-//		args.add(registers.request(target));
-//		instructions.add(new LibraryCall(labelHandler.requestStr("__print"), args , new Reg("Rdummy")));
-//		
-//		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, ifLabel)));
-        
-        int labelCounter = labelHandler.increaseLabelsCounter();
-        instructions.add(new CompareInstr(new Immediate(0), reg));
-        instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter), Cond.False));
-        instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[3])), registers.request(target)));
-        List<Operand> args = new ArrayList<Operand>();
-        args.add(registers.request(target));
-        instructions.add(new LibraryCall(labelHandler.requestStr("__print"), args , new Reg("Rdummy")));
-        instructions.add(new JumpInstr(labelHandler.requestStr("_PROGRAM_END")));
-        instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter)));
-        
-    }
+		_hasErrors[3] = true;
+		//        target+=2;
+		//        instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
+		//		instructions.add(new MoveInstr(reg, registers.request(++target)));
+		//		instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
+		//		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.False));
+		//		instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
+		//		instructions.add(new JumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
+		//		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL)));
+		//		instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
+		//		
+		//		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
+		//
+		//		labelHandler.increaseLabelsCounter();
+		//		int ifLabel = labelHandler.getLabelsCounter();
+		//		instructions.add(new CompareInstr(new Immediate(1), registers.request(target)));
+		//		CommonLabels jumpingLabel = CommonLabels.END_LABEL;
+		//		
+		//		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(jumpingLabel, ifLabel), Cond.False));
+		//		
+		//		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[3])), registers.request(target)));
+		//		//List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
+		//		//paramOpRegs.add(new ParamOpPair(new Memory("s"), registers.request(target)));
+		//		//instructions.add(new IC.lir.Instructions.StaticCall
+		//		//		(labelHandler.requestStr("Library_print"), paramOpRegs, registers.request(-1)));
+		//		List<Operand> args = new ArrayList<Operand>();
+		//		args.add(registers.request(target));
+		//		instructions.add(new LibraryCall(labelHandler.requestStr("__print"), args , new Reg("Rdummy")));
+		//		
+		//		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, ifLabel)));
+
+		int labelCounter = labelHandler.increaseLabelsCounter();
+		instructions.add(new CompareInstr(new Immediate(0), reg));
+		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter), Cond.False));
+		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[3])), registers.request(target)));
+		List<Operand> args = new ArrayList<Operand>();
+		args.add(registers.request(target));
+		instructions.add(new LibraryCall(labelHandler.requestStr("__print"), args , new Reg("Rdummy")));
+		instructions.add(new JumpInstr(labelHandler.requestStr("_PROGRAM_END")));
+		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter)));
+
+	}
 
 
-	
+
 }
