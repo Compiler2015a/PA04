@@ -32,7 +32,7 @@ public class Labels {
 		return labelsCounter;
 	}
 	
-	public void increaseLabelsCounter() {
-		labelsCounter++;
+	public int increaseLabelsCounter() {
+		return ++labelsCounter;
 	}
 }
