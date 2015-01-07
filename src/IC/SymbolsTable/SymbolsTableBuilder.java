@@ -276,14 +276,14 @@ public class SymbolsTableBuilder implements Visitor {
 		}
 		
 		IC.Types.Type localVarType = typeTable.getTypeFromASTTypeNode(localVariable.getType());
-		if (!addEntryAndCheckDuplication(localVariable.getSymbolsTable(), 
-				new SymbolEntry(localVariable.getName(), localVarType, IDSymbolsKinds.VARIABLE))) {
+		SymbolEntry localVarSymbolEntry = new SymbolEntry(localVariable.getName(), localVarType, IDSymbolsKinds.VARIABLE);
+		if (!addEntryAndCheckDuplication(localVariable.getSymbolsTable(), localVarSymbolEntry)) {
 			this.semanticErrorThrower = new SemanticErrorThrower(localVariable.getLine(),
 					"variable " + localVariable.getName() + " is initialized more than once");
 			
 			return false;
 		}
-		
+		localVariable.setGlobalName(localVarSymbolEntry.getGlobalId());
 		localVariable.setEntryType(localVarType);
 		return true;
 	}
@@ -310,6 +310,7 @@ public class SymbolsTableBuilder implements Visitor {
 				return false;
 			}
 		}
+		location.setGlobalName(varEntry.getGlobalId());
 		if (varEntry.getType().isClassType()) 
 			this.currentClassSymbolTablePoint = this.rootSymbolTable.findChildSymbolTable(varEntry.getType().toString());	
 		location.setEntryType(varEntry.getType());;
@@ -493,7 +494,6 @@ public class SymbolsTableBuilder implements Visitor {
 				return false;
 		}
 		
-		boolean flowWithoutReturn = true;
 		
 		for (Statement stmnt : method.getStatements()) {
 			stmnt.setSymbolsTable(currentMethodSymbolTable);

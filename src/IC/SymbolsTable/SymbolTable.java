@@ -19,6 +19,8 @@ public class SymbolTable {
 	  private List<SymbolEntry> sorted_entries; // is used for prints in printTable() method
 	  private List<SymbolTable> sorted_children; // is used for prints in printTable() method
 	  
+	  private Map<IDSymbolsKinds, Integer> entryKindsCounter;
+	  
 	  public SymbolTable(String id, SymbolTableTypes tableType) {
 	    this.id = id;
 	    this.tableType = tableType;
@@ -27,6 +29,8 @@ public class SymbolTable {
 	    
 	    this.sorted_entries = new ArrayList<SymbolEntry>();
 	    this.sorted_children = new ArrayList<SymbolTable>();
+	    
+	    this.entryKindsCounter = generateKindsCounter();
 	    this.parentSymbolTable = null;
 	  }
 
@@ -60,6 +64,9 @@ public class SymbolTable {
 		}
 	  
 	  public void addEntry(String key, SymbolEntry entry) {
+		  this.entryKindsCounter.put(entry.getKind(), entryKindsCounter.get(entry.getKind()) + 1);
+		  entry.setGlobalId(entry.getKind().getShortRepr() + 
+				  entryKindsCounter.get(entry.getKind()).toString() + "_" + entry.getId());
 		  this.entries.put(key, entry);
 		  this.sorted_entries.add(entry);
 	  }
@@ -127,6 +134,16 @@ public class SymbolTable {
 			  return "statement block in " + parentSymbolTable.toString();
 	  }
 	  
+	  private Map<IDSymbolsKinds, Integer> generateKindsCounter() {
+		  Map<IDSymbolsKinds, Integer> entryKindsCounter = new HashMap<IDSymbolsKinds, Integer>();
+		  entryKindsCounter.put(IDSymbolsKinds.CLASS, 0);
+		  entryKindsCounter.put(IDSymbolsKinds.FIELD, 0);
+		  entryKindsCounter.put(IDSymbolsKinds.FORMAL, 0);
+		  entryKindsCounter.put(IDSymbolsKinds.STATIC_METHOD, 0);
+		  entryKindsCounter.put(IDSymbolsKinds.VIRTUAL_METHOD, 0);
+		  entryKindsCounter.put(IDSymbolsKinds.VARIABLE, 0);
+		  return entryKindsCounter;
+	  }
 	  private SymbolTable findChildSymbolTableRecursive(SymbolTable root, String id) {
 		  if (root.children.containsKey(id))
 			  return root.children.get(id);

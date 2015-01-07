@@ -10,7 +10,8 @@ public class LocalVariable extends Statement {
 	private Type type;
 
 	private String name;
-
+	private String globalName;
+	
 	private Expression initValue = null;
 
 	public Object accept(Visitor visitor) {
@@ -63,4 +64,11 @@ public class LocalVariable extends Statement {
 		return initValue;
 	}
 
+	public String getGlobalName() {
+		return globalName;
+	}
+	
+	public void setGlobalName(String globalName) {
+		this.globalName = globalName;
+	}
 }

@@ -6,7 +6,8 @@ public class SymbolEntry {
 	private String id;
 	private Type type;
 	private IDSymbolsKinds kind;
-	  
+	private String globalId;
+	
 	public SymbolEntry(String id, Type type, IDSymbolsKinds kind) {
 		this.id =id;
 	    this.type = type;
@@ -34,4 +35,14 @@ public class SymbolEntry {
 		
 		return kind.toString() + ": " + type.toString() + " " + id;
 	}
+
+	public String getGlobalId() {
+		return globalId;
+	}
+
+	public void setGlobalId(String globalId) {
+		this.globalId = globalId;
+	}
+	
+	
 }

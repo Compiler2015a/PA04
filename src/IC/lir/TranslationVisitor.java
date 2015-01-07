@@ -317,7 +317,7 @@ public class TranslationVisitor implements Visitor{
 	public Object visit(LocalVariable localVariable) {
 		if (localVariable.hasInitValue()) {
 			localVariable.getInitValue().accept(this);
-			instructions.add(new MoveInstr(registers.request(target), new Memory(localVariable.getName())));
+			instructions.add(new MoveInstr(registers.request(target), new Memory(localVariable.getGlobalName())));
 			target++;
 		}
 		// TODO what if there isn't an init value???
@@ -339,7 +339,7 @@ public class TranslationVisitor implements Visitor{
 			instructions.add(new MoveFieldInstr(registers.request(target), new Immediate(fieldIndex), registers.request(target), true));
 		}
 		else {
-			Memory locationMemory = new Memory(location.getName());
+			Memory locationMemory = new Memory(location.getGlobalName());
 			if(assignmentCall)
 				instructions.add(new MoveInstr(registers.request(target+1), locationMemory));
 			instructions.add(new MoveInstr(locationMemory, registers.request(target)));
