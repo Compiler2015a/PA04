@@ -470,29 +470,47 @@ public class TranslationVisitor implements Visitor{
 	private void checkSizeGtZeroAndEmit(Operand size)
 	{
 		
-		instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
-		instructions.add(new MoveInstr(size, registers.request(target++)));
-		instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
-		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.L));
-		instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
-		instructions.add(new JumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
-		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL)));
-		instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
-		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
-
+//		instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
+//		instructions.add(new MoveInstr(size, registers.request(target++)));
+//		instructions.add(new CompareInstr(registers.request(target), registers.request(--target)));
+//		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL), Cond.L));
+//		instructions.add(new MoveInstr(new Immediate(0), registers.request(target)));
+//		instructions.add(new JumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
+//		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.TRUE_LABEL)));
+//		instructions.add(new MoveInstr(new Immediate(1), registers.request(target)));
+//		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
+//
+//		labelHandler.increaseLabelsCounter();
+//		int ifLabel = labelHandler.getLabelsCounter();
+//		instructions.add(new CompareInstr(new Immediate(1), registers.request(target)));
+//		CommonLabels jumpingLabel = CommonLabels.END_LABEL;
+//		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(jumpingLabel, ifLabel), Cond.False));
+//		
+//		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[2])), registers.request(target)));
+//		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
+//		paramOpRegs.add(new ParamOpPair(new Memory("s"), registers.request(target)));
+//		instructions.add(new IC.lir.Instructions.StaticCall
+//				(labelHandler.requestStr("Library_print"), paramOpRegs, registers.request(-1)));
+//		
+//		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, ifLabel)));
+		
+		/*Compare 0, size
+		JumpGTE _END_LABEL
+		Move "error", Rtarget
+		Library __print(Rtarget),Rdummy
+		Jump PROGRAM_END
+		_END_LABEL: */
+		
 		labelHandler.increaseLabelsCounter();
-		int ifLabel = labelHandler.getLabelsCounter();
-		instructions.add(new CompareInstr(new Immediate(1), registers.request(target)));
-		CommonLabels jumpingLabel = CommonLabels.END_LABEL;
-		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(jumpingLabel, ifLabel), Cond.False));
+		instructions.add(new CompareInstr(new Immediate(0), size));
+		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL), Cond.GE));
+		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[2])), registers.request(target)));
+		List<Operand> args = new ArrayList<Operand>();
+		args.add(registers.request(target));
+		instructions.add(new LibraryCall(labelHandler.requestStr("__print"), args, new Reg("Rdummy")));
+		instructions.add(new JumpInstr(labelHandler.requestStr("_PROGRAM_END")));
+		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL)));
 		
-		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[2])), registers.request(target))); //TODO: messes up strings
-		List<ParamOpPair> paramOpRegs = new ArrayList<ParamOpPair>();
-		paramOpRegs.add(new ParamOpPair(new Memory("s"), registers.request(target)));
-		instructions.add(new IC.lir.Instructions.StaticCall
-				(labelHandler.requestStr("Library_print"), paramOpRegs, registers.request(-1)));
-		
-		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, ifLabel)));
 	}
 
 	@Override
