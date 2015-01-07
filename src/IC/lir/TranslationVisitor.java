@@ -457,6 +457,10 @@ public class TranslationVisitor implements Visitor{
 		int clsTarget = target;
 		
 		instructions.add(new MoveInstr(loadingOperand, registers.request(target)));
+		
+		//check if the ref is null
+		checkNullRefAndEmit(registers.request(target));
+		
 		String clsName = call.isExternal() ?
 				call.getLocation().getEntryType().toString() : this.currentClassName;
 		int unusedMethodTarget = target;
