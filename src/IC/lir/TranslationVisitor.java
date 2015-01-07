@@ -53,15 +53,10 @@ public class TranslationVisitor implements Visitor{
 	int target;
 	StringLiterals stringLiterals;
 	StringBuilder emitted;
-
-
 	//class layouts
 	Map<String, ClassLayout> classLayouts;
-
-
 	//Instructions
 	List<Instruction> instructions;
-
 	// errors
 	private boolean[] _hasErrors;
 	private final String[] _errorStrings = {
@@ -70,6 +65,7 @@ public class TranslationVisitor implements Visitor{
 			"Runtime error: Array allocation with negative array size!",
 			"Runtime error: Division by zero!"
 	};
+	Map<String,Integer> arrs;
 	
 	private boolean assignmentCall = false;
 	
@@ -101,7 +97,7 @@ public class TranslationVisitor implements Visitor{
 		
 		this.methodFullNamesMap = new HashMap<String, List<String>>();
 		this.nodeHandlingQueue = new LinkedList<ASTNode>();
-		
+		this.arrs = new HashMap<String,Integer>();
 	}
 
 	public void printInstructions() {
@@ -351,6 +347,14 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(ArrayLocation location) {
+		
+		//System.out.println("555 "+location.);
+		//a: ((VariableLocation)location.getArray()).getName()
+		//11: ((Literal)location.getIndex()).getValue()
+		for(Integer cl : arrs.values()) {
+			System.out.println(cl);
+		}
+		
 		int assignmentTarget = target;
 		target+=3;
 		
@@ -360,17 +364,44 @@ public class TranslationVisitor implements Visitor{
 		target--;
 		location.getIndex().accept(this);
 		assignmentCall = tmp;
+		
+		// check if index > length
+		checkGTLengthAndEmit(registers.request(target),registers.request(target+1));
+		
 		if(assignmentCall)
 		/*currentAssignmentInstruction =*/instructions.add( new MoveArrayInstr(
 				registers.request(target+1), registers.request(target), // TODO check~!
 				registers.request(assignmentTarget+1), false));
 		instructions.add(new MoveArrayInstr(registers.request(target+1), registers.request(target), registers.request(/*--target*/assignmentTarget), true));
+
 		target=assignmentTarget;
+		
+		
+		
 		return null;
+	}
+	
+	private void checkGTLengthAndEmit(Reg index,Reg array)
+	{
+		target++;
+		int labelCounter = labelHandler.increaseLabelsCounter();
+		Reg currentSize=registers.request(++target);
+		instructions.add(new ArrayLengthInstr(array, currentSize));	
+		instructions.add(new CompareInstr(index, currentSize));
+		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter), Cond.L));
+		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[1])), registers.request(target)));
+		List<Operand> args = new ArrayList<Operand>();
+		args.add(registers.request(target));
+		instructions.add(new LibraryCall(labelHandler.requestStr("__print"), args, new Reg("Rdummy")));
+		instructions.add(new JumpInstr(labelHandler.requestStr("_PROGRAM_END")));
+		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter)));
+	
+		_hasErrors[1] = true;
 	}
 
 	@Override
 	public Object visit(StaticCall call) {
+		
 		int unusedMethodTarget = target;
 		//library method call		
 		if (call.getClassName().equals("Library")) {
@@ -476,7 +507,7 @@ public class TranslationVisitor implements Visitor{
 		
         // check if array size is non-negative
 		checkSizeGtZeroAndEmit(args.get(0));
-
+		
 		return true;
 	}
 	
