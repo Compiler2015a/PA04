@@ -717,6 +717,7 @@ public class TranslationVisitor implements Visitor{
 			//emit("And R"+target+",R"+(--target));
 			//emit(CommonLabels.END_LABEL.toString()+labels);
 			instructions.add(new BinOpInstr(registers.request(--target), registers.request(target+1), Operator.AND));
+			instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter)));
 			break;
 		case LOR:
 			binaryOp.getFirstOperand().accept(this);
