@@ -1,0 +1,30 @@
+
+class BoolCheck { 
+
+	static void main (string[] args) { 
+
+		int x = 4 ; 
+		int y ; 
+		y = 23;
+		boolean p; 
+		
+		//p =     ( x > 0     ) || ( -y < (5-3)    ) ; 
+		p = true;
+		// p supposed to be true
+		
+		Library.printb(p) ;
+		Library.println("");
+
+		p = (x<3) || (y>24);
+		// p should be false
+		Library.printb(p);
+		Library.println("");
+
+		p = (x>3) || (y>24);
+		// p should be true
+		Library.printb(p);
+		Library.println("");
+
+	}
+
+}
