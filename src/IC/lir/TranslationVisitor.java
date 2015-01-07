@@ -208,9 +208,9 @@ public class TranslationVisitor implements Visitor{
 			exitSinglOperandList.add(new Immediate(0));
 			instructions.add(new LibraryCall(labelHandler.requestStr("__exit"), exitSinglOperandList, registers.request(-1)));
 		}
-		else if (method.doesHaveFlowWithoutReturn())
+		else if (!method.doesHaveFlowWithoutReturn())
 			instructions.add(new ReturnInstr(registers.request(-1)));
-
+		//System.out.println(method.getName()+" flow: "+method.doesHaveFlowWithoutReturn());
 		return null;
 	}
 
@@ -352,15 +352,20 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(ArrayLocation location) {
 		int assignmentTarget = target;
-		target++;
+		target+=3;
+		
+		boolean tmp = assignmentCall;
+		assignmentCall = false;
 		location.getArray().accept(this);
 		target--;
 		location.getIndex().accept(this);
+		assignmentCall = tmp;
 		if(assignmentCall)
 		/*currentAssignmentInstruction =*/instructions.add( new MoveArrayInstr(
-				registers.request(target-1), registers.request(target), // TODO check~!
-				registers.request(assignmentTarget), false));
-		instructions.add(new MoveArrayInstr(registers.request(target+1), registers.request(target), registers.request(target), false));
+				registers.request(target+1), registers.request(target), // TODO check~!
+				registers.request(assignmentTarget+1), false));
+		instructions.add(new MoveArrayInstr(registers.request(target+1), registers.request(target), registers.request(/*--target*/assignmentTarget), true));
+		target=assignmentTarget;
 		return null;
 	}
 

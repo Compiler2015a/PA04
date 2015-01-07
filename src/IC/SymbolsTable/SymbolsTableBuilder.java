@@ -493,6 +493,8 @@ public class SymbolsTableBuilder implements Visitor {
 				return false;
 		}
 		
+		boolean flowWithoutReturn = true;
+		
 		for (Statement stmnt : method.getStatements()) {
 			stmnt.setSymbolsTable(currentMethodSymbolTable);
 			if(!(Boolean)stmnt.accept(this))
