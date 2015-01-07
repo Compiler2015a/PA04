@@ -80,7 +80,6 @@ public class TranslationVisitor implements Visitor{
 	private Stack<String> _endWhileLabelStack;
 	private String currentClassName;
 	private Map<String, List<String>> methodFullNamesMap;	
-	private Instruction currentAssignmentInstruction;
 	private IDSymbolsKinds currentMethodKind; // virtual or static
 	
 	public TranslationVisitor() {
@@ -328,17 +327,21 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(VariableLocation location) {
 		if (location.isExternal()) {
+			boolean tmp = assignmentCall;
+			assignmentCall = false;
 			location.getLocation().accept(this);
-			
+			assignmentCall = tmp;
 			String externalClsName = location.getLocation().getEntryType().toString();
 			int fieldIndex = this.classLayouts.get(externalClsName).getFieldIndex(location.getName());
-			currentAssignmentInstruction = new MoveFieldInstr(registers.request(target-1), new Immediate(fieldIndex), registers.request(target - 1), false); 
+			if(assignmentCall)
+				instructions.add(new MoveFieldInstr(registers.request(target), new Immediate(fieldIndex), registers.request(target+1), false)); 
+			
 			instructions.add(new MoveFieldInstr(registers.request(target), new Immediate(fieldIndex), registers.request(target), true));
 		}
 		else {
 			Memory locationMemory = new Memory(location.getName());
 			if(assignmentCall)
-			/*currentAssignmentInstruction =*/ instructions.add(new MoveInstr(registers.request(target+1), locationMemory));
+				instructions.add(new MoveInstr(registers.request(target+1), locationMemory));
 			instructions.add(new MoveInstr(locationMemory, registers.request(target)));
 			return locationMemory;
 		}
