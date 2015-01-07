@@ -71,6 +71,8 @@ public class TranslationVisitor implements Visitor{
 			"Runtime error: Division by zero!"
 	};
 	
+	private boolean assignmentCall = false;
+	
 	private Queue<ASTNode> nodeHandlingQueue;
 	// registers
 	//private Map<String, Integer> _registers;
@@ -229,12 +231,17 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(Assignment assignment) {
-		assignment.getAssignment().accept(this);
 		target++;
+		assignment.getAssignment().accept(this);
+		target--;
+		assignmentCall=true;
 		assignment.getVariable().accept(this);
-		instructions.add(currentAssignmentInstruction);
+		assignmentCall=false;
+		//instructions.add(currentAssignmentInstruction);
+		//target--;
 		return null;
 	}
+	
 
 	@Override
 	public Object visit(CallStatement callStatement) {
@@ -334,9 +341,10 @@ public class TranslationVisitor implements Visitor{
 		}
 		else {
 			Memory locationMemory = new Memory(location.getName());
-			currentAssignmentInstruction = new MoveInstr(registers.request(target-1), locationMemory);
+			if(assignmentCall)
+			/*currentAssignmentInstruction =*/ instructions.add(new MoveInstr(registers.request(target+1), locationMemory));
 			instructions.add(new MoveInstr(locationMemory, registers.request(target)));
-
+			return locationMemory;
 		}
 		return null;
 	}
@@ -348,9 +356,10 @@ public class TranslationVisitor implements Visitor{
 		location.getArray().accept(this);
 		target--;
 		location.getIndex().accept(this);
-		currentAssignmentInstruction = new MoveArrayInstr(
+		if(assignmentCall)
+		/*currentAssignmentInstruction =*/instructions.add( new MoveArrayInstr(
 				registers.request(target-1), registers.request(target), // TODO check~!
-				registers.request(assignmentTarget), false);
+				registers.request(assignmentTarget), false));
 		instructions.add(new MoveArrayInstr(registers.request(target+1), registers.request(target), registers.request(target), false));
 		return null;
 	}
