@@ -1,0 +1,36 @@
+
+class A {
+	int field ;  
+	
+	int incField () { 
+		field = field + 1 ; 
+		return field ; 
+	}
+	int print() { 
+		Library.println("This line will not be printed") ; 
+		return 1 ; 
+	}
+	
+	static void main (string[] args) { 
+		A a = new A() ; 
+		a.field = 9 ; 
+		
+		int x = 4 ; 
+		int res = 0 ; 
+		
+		if ( (x > 3) || (x/0 > 0) ) 
+			res = res + 1 ; 
+		if ( (x < 3) && ( a.incField() > 10 ) ) 
+			res = res + 10 ; 
+		if ( (x == 4) || ( a.print() == 0 ) )
+			res = res + 100 ; 
+		
+		Library.print("res = ") ; 
+		Library.printi(res) ; 
+		Library.println("") ; 
+		Library.print("a.field = ") ; 
+		Library.printi(a.field) ; 
+		
+	}
+
+}

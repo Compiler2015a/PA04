@@ -1,0 +1,41 @@
+	
+class A {
+    int a;
+	void init() {
+	 a = 0;
+	}
+
+	void inc() {
+	 a = a + 1;
+	}
+
+	void print() {
+	 Library.printi(a);
+	 Library.println("");
+	}
+} 
+
+class Check {
+	static void main (string[] args) { 
+		A a1 = new A();
+		a1.init();
+
+		A a2 = new A();
+		a2.init();
+
+		Library.printb(a1 == a2);
+		Library.println("");
+		
+		Library.printb(a1 == a1);
+		Library.println("");
+		
+		a1.inc();
+		Library.printb(a1 == a2);
+		Library.println("");
+		
+		a2.inc();
+		Library.printb(a1 == a2);
+		Library.println("");
+		
+ 	}
+}

@@ -1,0 +1,67 @@
+class A { 
+	int x ; 
+	int y ; 
+	
+	void setX (int x1) { 
+		x = x1 ; 
+	}
+	void setY (int y1) { 
+		this.y = y1 ; 
+	}
+	void print () { 
+		Library.print("A: [") ; 
+		Library.printi(x) ; 		
+		Library.print(", ") ; 
+		Library.printi(this.y) ; 
+		Library.print("] ") ;
+		Library.println("") ;  
+	}
+}
+
+class B extends A { 
+	void print() { 
+		Library.println("**************") ; 
+		Library.print("* B: [") ; 
+		Library.printi(x) ; 		
+		Library.print(", ") ; 
+		Library.printi(this.y) ; 
+		Library.print("] *") ;
+		Library.println("") ;  
+		Library.println("**************") ; 
+	}
+}
+
+class C extends B { 
+	int z ; 
+	
+	void setZ (int z) { 
+		this.z = z ; 
+	}
+
+	void print() { 
+		Library.println("******************") ; 
+		Library.print("* C: [") ; 
+		Library.printi(x) ; 		
+		Library.print(", ") ; 
+		Library.printi(this.y) ; 
+		Library.print(", ") ; 
+		Library.printi(z) ; 
+		Library.print("] *") ;
+		Library.println("") ;  
+		Library.println("******************") ; 
+	}
+}
+
+class MainClass { 
+
+	static void main (string[] args) { 
+		A a = new A() ; a.setX(4); a.setY(8); 	
+		A b = new B() ; b.setX(-2); b.setY(5); 
+		A c = new C() ; c.setX(-3); c.setY(-3); 
+		
+		a.print() ; 
+		b.print() ; 
+		c.print() ; 
+	}
+
+}

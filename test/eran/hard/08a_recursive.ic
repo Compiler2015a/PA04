@@ -1,0 +1,27 @@
+	
+class A {
+	static int calc_print_factorial(int n) {
+	 if (n <= 1) {
+	  Library.printi(n);
+	  Library.print(" ");
+	  return n;
+	 } else {
+	  int a = A.calc_print_factorial(n-1);
+	  a = a * n;
+	  Library.printi(a);
+	  Library.print(" ");
+	  return a;
+	 }
+	}
+} 
+
+class Check {
+	static void main (string[] args) { 
+		
+		A.calc_print_factorial(3);
+		Library.println("");
+
+		A.calc_print_factorial(5);
+		Library.println("");
+ 	}
+}

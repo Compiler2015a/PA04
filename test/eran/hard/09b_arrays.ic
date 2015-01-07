@@ -1,0 +1,56 @@
+
+class MainClass { 
+
+	static void main (string[] args) { 
+	
+		Arrays.printArr( Arrays.sumArr(
+							Arrays.buildArr(14, 2), 
+							Arrays.buildArr(14, 3) ) ) ; 
+							
+		Library.printi ( Arrays.sumArr(
+							Arrays.buildArr(14, 2), 
+							Arrays.buildArr(14, 3) )[2] ) ; 
+	
+		Library.println("");		
+	}
+
+}
+
+class Arrays { 
+	
+	// returns a new int array of size 'size' with each 
+	// entry equals to 'val'. 
+	static int[] buildArr(int size, int val)  { 
+		int[] a = new int[size] ; 
+		int i = 0 ; 
+		while ( i < a.length ) { 
+			a[i] = val ; 
+			i = i + 1 ;
+		}
+		return a ; 
+	}
+	static int[] sumArr (int[] a, int[] b) { 
+		int size = a.length ; 
+		int[] sum = new int[size] ; 
+		
+		int i = 0 ; 
+		while ( i < a.length ) { 
+			sum[i] = a[i] + b[i] ; 
+			i = i + 1 ;
+		}
+		return sum ; 
+	}
+	
+	static void printArr ( int[] a ) { 
+		Library.print("[ ") ;
+		int i = 0 ; 
+		while ( i < a.length-1 ) { 
+			Library.printi(a[i]) ; 
+			Library.print(", ") ; 
+			i = i + 1 ;
+		}
+		Library.printi(a[i]) ; 
+		Library.print(" ]") ; 
+		Library.println("") ; 
+	}	
+}

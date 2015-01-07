@@ -1,0 +1,22 @@
+
+class MainClass { 
+
+	static void main (string[] args) { 
+		
+		A a = null;
+
+		Library.println("null.method ");
+		Library.printi(a.twice(2));
+		Library.println("");
+		Library.println("Should not print this or get here.");
+
+	}
+
+}
+
+class A {
+ int field;
+ int twice(int a) {
+  return 2 * a;
+ }
+}

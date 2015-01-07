@@ -1,0 +1,17 @@
+
+class MainClass { 
+
+	static void main (string[] args) { 
+		
+		int a;
+		int b = 0;
+
+		Library.println("5 / b = ");
+		a = 5 / b;
+		Library.printi(a);
+		Library.println("");
+		Library.println("Should not print this or get here.");
+
+	}
+
+}

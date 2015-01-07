@@ -1,0 +1,17 @@
+/* 	This program demonstrates calling a virtual method in a static way */
+	
+class A {
+	static void print_sum(int a, int b) {
+	 Library.printi(a + b);
+	 Library.println("");
+	}
+} 
+
+class Check {
+	static void main (string[] args) { 
+		
+		A.print_sum(4, 6);
+		A.print_sum(4 + 6, 5 + 5);
+		A.print_sum(1, 2);
+ 	}
+}

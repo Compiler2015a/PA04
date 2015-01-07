@@ -1,0 +1,25 @@
+/* 	This Program includes an proper method override of
+    a method of one class in its sub-class. */ 
+	
+class A {
+	
+	int func ( int a ) { 
+		return a + a ; 
+	}
+
+	static void main (string[] args) { 
+		A b = new B();
+		Library.println("b.func(37) =");
+		Library.printi(b.func(37));
+		Library.println("");
+	}
+}
+
+class B extends A { 
+	
+	// overriding of func
+	int func ( int a ) {
+		return a + a + a ; 
+	}
+	
+}

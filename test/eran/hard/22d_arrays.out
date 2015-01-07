@@ -1,0 +1,2 @@
+new int[-4]
+Runtime Error: Array allocation with negative array size!

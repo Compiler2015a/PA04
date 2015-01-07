@@ -1,0 +1,32 @@
+/* 	This Program includes a proper inheritance of two simple 
+	classes. The main method calls all superclass method using
+	an instance of the inherited class.  */ 
+	
+class MySuperClass {
+
+	void a () 			{						} 
+
+	int b ()  			{ return 0 ;			}
+
+	// variable a hides method a
+	string c (int a) 	{ return "hello" ;		} 
+
+	int[] d (string s)  { return new int[3]; 	}
+}
+
+class MyInheritedClass extends MySuperClass { 
+}
+
+class Check {
+
+	static void main (string[] args) {
+		MySuperClass obj = new MyInheritedClass() ; 
+		obj.a() ; 
+		int x = obj.b() ; 
+		string str = obj.c(x) ; 
+		int[] arr = obj.d(str) ;
+		Library.printi(x) ;
+		Library.printi(arr.length) ;
+		Library.println(str) ;
+	}
+} 

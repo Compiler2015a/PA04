@@ -1,0 +1,36 @@
+/* 	This Program includes an proper long inheritance between 
+	a lot of classes. */ 
+	
+class A { 
+	int ancestorField ; 
+	void ancestorMethod() { 
+		Library.printi(ancestorField); 
+		Library.println(" zoot!"); 
+	} 
+} 
+class B extends A {}
+class C extends B {} 
+class D extends C {} 
+class D1 extends D {} 
+class D2 extends D {} 
+class D3 extends D {} 
+class E extends D3 {} 
+class F extends E {} 
+class G extends F {} 
+class MyClass extends G {} 
+
+class Check {
+	static void main (string[] args) {
+		MyClass obj = new MyClass() ; 
+		int x = obj.ancestorField ; 
+		action(obj);
+		obj.ancestorField = obj.ancestorField + 1;
+		obj.ancestorMethod() ; 
+	}
+	
+	static void action(A obj)
+	{
+		obj.ancestorField = 6 ;
+		obj.ancestorMethod() ; 
+	}
+}

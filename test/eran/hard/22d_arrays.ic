@@ -1,0 +1,12 @@
+
+class MainClass { 
+
+	static void main (string[] args) { 
+
+		Library.println("new int[-4]");
+		int[] arr = new int[-4];
+		Library.println("Should not print this or get here.");
+
+	}
+
+}

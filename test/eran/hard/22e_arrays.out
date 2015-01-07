@@ -1,0 +1,3 @@
+a = -3
+new int[a]
+Runtime Error: Array allocation with negative array size!

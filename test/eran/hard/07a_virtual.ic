@@ -1,0 +1,35 @@
+/* 	This program demonstrates calling a virtual method in a static way */
+	
+class A {
+    int a;
+	void init() {
+	 a = 0;
+	}
+
+	void inc() {
+	 a = a + 1;
+	}
+
+	void print() {
+	 Library.printi(a);
+	 Library.println("");
+	}
+} 
+
+class Check {
+	static void main (string[] args) { 
+		A objA = new A();
+		objA.init();
+		
+		objA.print();
+		objA.inc();
+		objA.print();
+		objA.inc();
+		objA.print();
+		objA.inc();
+		objA.print();
+		objA.inc();
+		objA.print();
+		objA.inc();
+ 	}
+}

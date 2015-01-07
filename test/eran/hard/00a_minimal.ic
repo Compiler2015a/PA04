@@ -1,0 +1,25 @@
+
+class A {
+	int x ;
+	int y ;
+	int func1 ( int a ) {
+		return 5 ;
+	}
+	int func2 ( int b ) {
+		return 6 ;
+	}
+	
+	static void main ( string[] args ) {
+		return ; 
+	}
+}
+
+class B extends A {
+	int z ;
+	int func2 ( int b ) {
+		return 7 ;
+	}
+	int func3 ( int c ) {
+		return 8 ;
+	}
+}
