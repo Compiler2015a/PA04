@@ -32,18 +32,16 @@ public class ClassLayout {
 	 */
 	public void addMethod(String methodName) {
 		MethodStrc methodStrc;
-		if (methodName.equals("main")) {
-			methodStrc = new MethodStrc(methodName, this.className);
-		}
-		else {
-			methodStrc = findMethod(methods, methodName);
-			if (methodStrc != null) { // overriding case:
-				methods.remove(methodStrc);
-				methodStrc.clsName = this.className;
-			}
-			else
+		if (!methodName.equals("main")) {
+			int existingMethodStrcIndex = findMethodIndex(methods, methodName);
+			if (existingMethodStrcIndex != -1)  {// overriding case:
 				methodStrc = new MethodStrc(methodName, this.className);
+				methods.remove(existingMethodStrcIndex);
+				methods.add(existingMethodStrcIndex, methodStrc);
+				return;
+			}
 		}
+		methodStrc = new MethodStrc(methodName, this.className);
 		methods.add(methodStrc);
 		
 	}
@@ -107,12 +105,15 @@ public class ClassLayout {
 		return sb.toString();
 	}
 	
-	private MethodStrc findMethod(List<MethodStrc> list, String methodName) {
-		for (MethodStrc methodStrc : list)
+	private int findMethodIndex(List<MethodStrc> list, String methodName) {
+		int i = 0;
+		for (MethodStrc methodStrc : list) {
 			if (methodStrc.methodName.equals(methodName))
-				return methodStrc;
+				return i;
+			i++;
+		}
 		
-		return null;
+		return -1;
 	}
 	private class MethodStrc {
 		private String methodName;
