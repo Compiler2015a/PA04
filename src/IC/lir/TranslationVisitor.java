@@ -527,10 +527,12 @@ public class TranslationVisitor implements Visitor{
 		instructions.add(new BinOpInstr(new Immediate(4), registers.request(target), Operator.MUL)); //multiply size by 4
 		args.add(registers.request(target--));
 
-		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateArray"), args, registers.request(target)));
-
 		// check if array size is non-negative
 		checkSizeGtZeroAndEmit(args.get(0));
+		
+		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateArray"), args, registers.request(target)));
+
+		
 
 		return true;
 	}
