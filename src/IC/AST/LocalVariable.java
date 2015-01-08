@@ -10,7 +10,6 @@ public class LocalVariable extends Statement {
 	private Type type;
 
 	private String name;
-	private String globalName;
 	
 	private Expression initValue = null;
 
@@ -62,13 +61,5 @@ public class LocalVariable extends Statement {
 
 	public Expression getInitValue() {
 		return initValue;
-	}
-
-	public String getGlobalName() {
-		return globalName;
-	}
-	
-	public void setGlobalName(String globalName) {
-		this.globalName = globalName;
 	}
 }

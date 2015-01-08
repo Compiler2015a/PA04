@@ -2,8 +2,6 @@ package IC.AST;
 
 import java.util.List;
 
-import IC.SymbolsTable.SymbolEntry;
-
 /**
  * Abstract base class for method call AST nodes.
  * 
@@ -14,7 +12,6 @@ public abstract class Call extends Expression {
 	private String name;
 	private List<Expression> arguments;
 	private IC.Types.Type methodType;
-
 	/**
 	 * Constructs a new method call node. Used by subclasses.
 	 * 
@@ -43,8 +40,8 @@ public abstract class Call extends Expression {
 		return methodType;
 	}
 
-	public void setMethodType(IC.Types.Type methodType) {
-		this.methodType = methodType;
+	public void setMethodType(IC.Types.Type methodTtype) {
+		this.methodType = methodTtype;
 	}
-	
+
 }

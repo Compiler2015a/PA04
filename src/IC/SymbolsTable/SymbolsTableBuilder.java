@@ -106,26 +106,26 @@ public class SymbolsTableBuilder implements Visitor {
 		for (Field field : icClass.getFields()) {
 			nodeHandlingQueue.add(field);
 			IC.Types.Type fieldType = typeTable.getTypeFromASTTypeNode(field.getType());
-			if (!addEntryAndCheckDuplication(currentClassSymbolTable, 
-					new SymbolEntry(field.getName(), fieldType, IDSymbolsKinds.FIELD))) {
+			SymbolEntry fieldSymbolEntry = new SymbolEntry(field.getName(), fieldType, IDSymbolsKinds.FIELD);
+			if (!addEntryAndCheckDuplication(currentClassSymbolTable, fieldSymbolEntry)) {
 				this.semanticErrorThrower = new SemanticErrorThrower(
 						field.getLine(), "field " + field.getName() + " is declared more than once");
 				return false;
 			}
-			field.setEntryType(fieldType);
+			field.setSymbolEntry(fieldSymbolEntry);
 			field.setSymbolsTable(currentClassSymbolTable);
 		}
 		
 		for (Method method : icClass.getMethods()) {
 			nodeHandlingQueue.add(method);
 			IC.Types.Type methodType = typeTable.getMethodType(method);
-			if (!addEntryAndCheckDuplication(currentClassSymbolTable, 
-					new SymbolEntry(method.getName(), methodType, getMethodKind(method)))) {
+			SymbolEntry methodSymbolEntry = new SymbolEntry(method.getName(), methodType, getMethodKind(method));
+			if (!addEntryAndCheckDuplication(currentClassSymbolTable, methodSymbolEntry)) {
 				this.semanticErrorThrower = new SemanticErrorThrower(
 						method.getLine(), "method " + method.getName() + " is declared more than once");
 				return false;
 			}
-			method.setEntryType(methodType);
+			method.setSymbolEntry(methodSymbolEntry);
 			method.setSymbolsTable(currentClassSymbolTable);
 			SymbolTable currentMethodSymbolTable = new SymbolTable(method.getName(), SymbolTableTypes.METHOD);
 			currentMethodSymbolTable.setParentSymbolTable(currentClassSymbolTable);
@@ -164,8 +164,7 @@ public class SymbolsTableBuilder implements Visitor {
 					formal.getLine(), "formal " + formal.getName() + " is declared more than once");
 			return false;
 		}
-		formal.setGlobalName(formalSymbolEntry.getGlobalId());
-		formal.setEntryType(formalType);
+		formal.setSymbolEntry(formalSymbolEntry);
 		return true;
 	}
 
@@ -284,8 +283,7 @@ public class SymbolsTableBuilder implements Visitor {
 			
 			return false;
 		}
-		localVariable.setGlobalName(localVarSymbolEntry.getGlobalId());
-		localVariable.setEntryType(localVarType);
+		localVariable.setSymbolEntry(localVarSymbolEntry);
 		return true;
 	}
 
@@ -311,10 +309,9 @@ public class SymbolsTableBuilder implements Visitor {
 				return false;
 			}
 		}
-		location.setGlobalName(varEntry.getGlobalId());
+		location.setSymbolEntry(varEntry);
 		if (varEntry.getType().isClassType()) 
 			this.currentClassSymbolTablePoint = this.rootSymbolTable.findChildSymbolTable(varEntry.getType().toString());	
-		location.setEntryType(varEntry.getType());;
 		return true;
 	}
 

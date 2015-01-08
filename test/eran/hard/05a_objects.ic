@@ -6,7 +6,7 @@ class A {
 	}
 
 	void inc() {
-	 a = a + 1;
+	 a = this.a + 1;
 	}
 
 	void print() {

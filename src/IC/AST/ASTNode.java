@@ -13,7 +13,8 @@ public abstract class ASTNode {
 	private SymbolTable symbolsTable;
 	
 	private IC.Types.Type entryType;
-
+	private IC.SymbolsTable.SymbolEntry symbolEntry;
+	
 	/**
 	 * Double dispatch method, to allow a visitor to visit a specific subclass.
 	 * 
@@ -33,6 +34,7 @@ public abstract class ASTNode {
 	protected ASTNode(int line) {
 		this.symbolsTable = null;
 		this.line = line;
+		this.symbolEntry = null;
 	}
 
 	public int getLine() {
@@ -48,10 +50,20 @@ public abstract class ASTNode {
 	}
 	
 	public IC.Types.Type getEntryType() {
-		return entryType;
+		return (this.symbolEntry == null) ? entryType : this.symbolEntry.getType();
 	}
 
 	public void setEntryType(IC.Types.Type entryType) {
 		this.entryType = entryType;
 	}
+
+	public IC.SymbolsTable.SymbolEntry getSymbolEntry() {
+		return symbolEntry;
+	}
+
+	public void setSymbolEntry(IC.SymbolsTable.SymbolEntry symbolEntry) {
+		this.symbolEntry = symbolEntry;
+	}
+	
+	
 }

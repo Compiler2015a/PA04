@@ -10,7 +10,6 @@ public class VariableLocation extends Location {
 	private Expression location = null;
 
 	private String name;
-	private String globalName;
 	
 	public Object accept(Visitor visitor) {
 		return visitor.visit(this);
@@ -54,13 +53,5 @@ public class VariableLocation extends Location {
 
 	public String getName() {
 		return name;
-	}
-	
-	public String getGlobalName() {
-		return globalName;
-	}
-	
-	public void setGlobalName(String globalName) {
-		this.globalName = globalName;
 	}
 }

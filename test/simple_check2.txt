@@ -6,12 +6,14 @@ class A {
 		Library.printi(a.foo(x));
 	}
 	int counter;
-	
 	int foo(int x) {
 		if (counter == 2)
 			return x+3;
-		
-		return 1;
+		else {
+			counter = counter + 1;
+			x = x + 2;
+			return foo(x);
+		}
 	}
 }
 
