@@ -1,10 +1,16 @@
 class A {
 	D d;
+	int x;
 	static void main(string[] args) { 
+		A a = new A();
+		Library.printi(a.foo());
 	}
 	
-	void foo() {
+	int foo() {
+		d = new D();
+		d.c = new C();
 		d.c.x = 5;
+		return d.c.x;
 	}
 }
 

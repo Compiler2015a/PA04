@@ -82,7 +82,8 @@ public class TranslationVisitor implements Visitor{
 	private String currentClassName;
 	private Map<String, List<String>> methodFullNamesMap;	
 	private IDSymbolsKinds currentMethodKind; // virtual or static
-
+	private Boolean isMainMethod;
+	
 	public TranslationVisitor() {
 		this.classLayouts = new HashMap<String,ClassLayout>();
 		this.stringLiterals = new StringLiterals(); //there is also a StringLiteral class in the Instructions package. Replace?? (Answer: no, I fixed it to use that class, it's OK)
@@ -124,7 +125,6 @@ public class TranslationVisitor implements Visitor{
 			currentNode = nodeHandlingQueue.poll();
 			currentNode.accept(this);
 		}
-		instructions.add(new LabelInstr(labelHandler.requestStr("_PROGRAM_END")));
 	}
 
 	@Override
@@ -182,6 +182,7 @@ public class TranslationVisitor implements Visitor{
 
 	private Object visitMethod(Method method)
 	{
+		isMainMethod = method.getName().equals("main");
 		this.target = 1;
 		this.currentMethodKind = method.getSymbolsTable().getEntry(method.getName()).getKind();
 		// add method label
@@ -198,8 +199,9 @@ public class TranslationVisitor implements Visitor{
 		for (Statement stmt : method.getStatements()) {
 			stmt.accept(this);
 		}
-
-		if (method.getName().equals("main")) {
+		
+		if (isMainMethod) {
+			instructions.add(new LabelInstr(labelHandler.requestStr("_PROGRAM_END")));
 			List<Operand> exitSinglOperandList = new ArrayList<Operand>();
 			exitSinglOperandList.add(new Immediate(0));
 			instructions.add(new LibraryCall(labelHandler.requestStr("__exit"), exitSinglOperandList, registers.request(-1)));
@@ -207,6 +209,7 @@ public class TranslationVisitor implements Visitor{
 		else if (!method.doesHaveFlowWithoutReturn())
 			instructions.add(new ReturnInstr(registers.request(-1)));
 		//System.out.println(method.getName()+" flow: "+method.doesHaveFlowWithoutReturn());
+		isMainMethod = false;
 		return null;
 	}
 
@@ -247,11 +250,13 @@ public class TranslationVisitor implements Visitor{
 
 	@Override
 	public Object visit(Return returnStatement) {
-		if(returnStatement.hasValue()) {
-			returnStatement.getValue().accept(this);
-			instructions.add(new ReturnInstr(registers.request(target)));
-		} else {
-			instructions.add(new ReturnInstr(registers.request(-1)));
+		if (!isMainMethod) {
+			if(returnStatement.hasValue()) {
+				returnStatement.getValue().accept(this);
+				instructions.add(new ReturnInstr(registers.request(target)));
+			} else {
+				instructions.add(new ReturnInstr(registers.request(-1)));
+			}
 		}
 		return null;
 	}
@@ -454,14 +459,13 @@ public class TranslationVisitor implements Visitor{
 			staticCall.setMethodType(call.getMethodType());
 			return staticCall.accept(this);
 		}
-		if (call.isExternal()) {// TODO CHECK!!!!!!!!!!!
-			target++;
+		if (call.isExternal()) {
 			call.getLocation().accept(this);
 		}
-		Operand loadingOperand = call.isExternal() ? registers.request(target-1) : new Memory("this");
+		else 
+			instructions.add(new MoveInstr(new Memory("this"), registers.request(target)));
+		
 		int clsTarget = target;
-
-		instructions.add(new MoveInstr(loadingOperand, registers.request(target)));
 
 		//check if the ref is null
 		checkNullRefAndEmit(registers.request(target));
@@ -766,11 +770,10 @@ public class TranslationVisitor implements Visitor{
 			//emit("JumpTrue _end_label"+labels);
 			instructions.add(new CompareInstr(new Immediate(1), registers.request(target)));
 			instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter), Cond.True));
-			target++;
 			binaryOp.getSecondOperand().accept(this);
 			//emit("Or R"+target+",R"+(--target));
 			//emit(CommonLabels.END_LABEL.toString()+labels);
-			instructions.add(new BinOpInstr(registers.request(--target), registers.request(target+1), Operator.OR));
+			
 			instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter)));
 			break;
 		default:

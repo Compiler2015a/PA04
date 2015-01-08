@@ -1,0 +1,27 @@
+class A {
+	int x;
+	int[] g;
+	static void main(string[] args) {
+		int x = 6*2 / 4;
+		int y = 0;
+		B b = new B();
+		b.c = new C();
+		b.c.a = new B(); 
+		string[] g = new string[4];
+		this.g = new int[y];
+		b.c.a.x = (y-2) * x * ((-7)); // 42 
+		if (x == 3 && (y / 4 > 5) || ((!false) && (true) && (4*6+1 != 24))
+			if ((b.c.a.x > 41) || (24 * 2 < 100))
+				if ((g.length > 0) && (this.g.length == 0))
+					Library.println("yes");
+	}
+}
+Class B extends A{
+	C c;
+}
+
+Class C {
+	A a;
+}
+
+

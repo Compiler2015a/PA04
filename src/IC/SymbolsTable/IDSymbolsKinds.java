@@ -8,7 +8,7 @@ public enum IDSymbolsKinds {
 	VIRTUAL_METHOD("Virtual method", "virtual"),
 	VARIABLE("Local variable", "var"),
 	FORMAL("Parameter", "param"),
-	FIELD("Field", "filed");
+	FIELD("Field", "field");
 	
 	private final String repr;       
 	private final String shortRepr;       
