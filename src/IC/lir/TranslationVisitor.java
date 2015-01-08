@@ -387,9 +387,13 @@ public class TranslationVisitor implements Visitor{
 		location.getIndex().accept(this);
 		assignmentCall = tmp;
 
-		// check if index > length
+		// check if index > length 
 		checkGTLengthAndEmit(registers.request(target),registers.request(target+1));
 
+		// check if index < 0
+		checkSizeGtZeroAndEmit(registers.request(target));
+
+		
 		if(assignmentCall)
 			/*currentAssignmentInstruction =*/instructions.add( new MoveArrayInstr(
 					registers.request(target+1), registers.request(target), // TODO check~!
@@ -418,6 +422,7 @@ public class TranslationVisitor implements Visitor{
 		instructions.add(new JumpInstr(labelHandler.requestStr("_PROGRAM_END")));
 		instructions.add(new LabelInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter)));
 
+		target-=2;
 		_hasErrors[1] = true;
 	}
 
@@ -530,22 +535,15 @@ public class TranslationVisitor implements Visitor{
 
 		// check if array size is non-negative
 		checkSizeGtZeroAndEmit(args.get(0));	
-		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateArray"), args, registers.request(target)));
-
 		
-
+		
+		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateArray"), args, registers.request(target)));
+		
 		return true;
 	}
 
 	private void checkSizeGtZeroAndEmit(Operand size)
 	{
-		
-		/*Compare 0, size
-		JumpGTE _END_LABEL
-		Move "error", Rtarget
-		Library __print(Rtarget),Rdummy
-		Jump PROGRAM_END
-		_END_LABEL: */
 
 		int labelCounter = labelHandler.increaseLabelsCounter();
 		instructions.add(new CompareInstr(new Immediate(0), size));
