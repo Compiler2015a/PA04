@@ -158,12 +158,13 @@ public class SymbolsTableBuilder implements Visitor {
 	@Override
 	public Object visit(Formal formal) {
 		IC.Types.Type formalType = typeTable.getTypeFromASTTypeNode(formal.getType());
-		if (!addEntryAndCheckDuplication(formal.getSymbolsTable(), 
-				new SymbolEntry(formal.getName(), formalType, IDSymbolsKinds.FORMAL))) {
+		SymbolEntry formalSymbolEntry = new SymbolEntry(formal.getName(), formalType, IDSymbolsKinds.FORMAL);
+		if (!addEntryAndCheckDuplication(formal.getSymbolsTable(), formalSymbolEntry)) {
 			this.semanticErrorThrower = new SemanticErrorThrower(
 					formal.getLine(), "formal " + formal.getName() + " is declared more than once");
 			return false;
 		}
+		formal.setGlobalName(formalSymbolEntry.getGlobalId());
 		formal.setEntryType(formalType);
 		return true;
 	}

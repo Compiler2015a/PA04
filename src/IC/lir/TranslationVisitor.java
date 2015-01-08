@@ -850,7 +850,7 @@ public class TranslationVisitor implements Visitor{
 	private List<String> generatMethodParamsList(Method method) {
 		List<String> output = new ArrayList<String>();
 		for (Formal formal : method.getFormals()) 
-			output.add(formal.getName());
+			output.add(formal.getGlobalName());
 		return output;
 	}
 
