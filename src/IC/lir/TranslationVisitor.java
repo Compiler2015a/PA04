@@ -342,6 +342,7 @@ public class TranslationVisitor implements Visitor{
 			assignmentCall = false;
 			location.getLocation().accept(this);
 			assignmentCall = tmp;
+			checkNullRefAndEmit(registers.request(target));
 			String externalClsName = location.getLocation().getEntryType().toString();
 			int fieldIndex = this.classLayouts.get(externalClsName).getFieldIndex(location.getName());
 			if(assignmentCall)
@@ -370,9 +371,6 @@ public class TranslationVisitor implements Visitor{
 	@Override
 	public Object visit(ArrayLocation location) {
 
-		//System.out.println("555 "+location.);
-		//a: ((VariableLocation)location.getArray()).getName()
-		//11: ((Literal)location.getIndex()).getValue()
 		for(Integer cl : arrs.values()) {
 			System.out.println(cl);
 		}
@@ -386,7 +384,8 @@ public class TranslationVisitor implements Visitor{
 		target--;
 		location.getIndex().accept(this);
 		assignmentCall = tmp;
-
+		
+		checkNullRefAndEmit(registers.request(target + 1));
 		// check if index > length 
 		checkGTLengthAndEmit(registers.request(target),registers.request(target+1));
 
@@ -563,12 +562,8 @@ public class TranslationVisitor implements Visitor{
 		target++;
 		length.getArray().accept(this);
 		target--;
-		Object o=length.getArray();
-		//emit("ArrayLength R"+(target+1)+",R"+target);
+		checkNullRefAndEmit(registers.request(target + 1));
 		instructions.add(new ArrayLengthInstr(registers.request(target+1), registers.request(target)));
-
-		// check if null
-		checkNullRefAndEmit(registers.request(target));
 
 		return null;
 	}

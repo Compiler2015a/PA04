@@ -1,0 +1,11 @@
+
+class MainClass { 
+
+	static void main (string[] args) { 
+
+		int[] arr = new int[6];
+		arr[0] = 80;
+				
+	}
+
+}
