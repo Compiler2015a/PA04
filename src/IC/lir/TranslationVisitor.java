@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Stack;
 
+import sun.awt.image.ImageAccessException;
 import IC.AST.ASTNode;
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
@@ -409,7 +410,7 @@ public class TranslationVisitor implements Visitor{
 		Reg currentSize=registers.request(++target);
 		instructions.add(new ArrayLengthInstr(array, currentSize));	
 		instructions.add(new CompareInstr(index, currentSize));
-		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter), Cond.L));
+		instructions.add(new CondJumpInstr(labelHandler.innerLabelRequest(CommonLabels.END_LABEL, labelCounter), Cond.G));
 		instructions.add(new MoveInstr(new Memory("str"+stringLiterals.add(_errorStrings[1])), registers.request(target)));
 		List<Operand> args = new ArrayList<Operand>();
 		args.add(registers.request(target));
@@ -538,7 +539,7 @@ public class TranslationVisitor implements Visitor{
 
 	private void checkSizeGtZeroAndEmit(Operand size)
 	{
-
+		
 		/*Compare 0, size
 		JumpGTE _END_LABEL
 		Move "error", Rtarget
