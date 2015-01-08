@@ -1,0 +1,10 @@
+class A {
+	static void main(string[] args) {
+		A a = new A();
+		a.x = new int[4];
+		a.x[2] = 5;
+		Library.printi(a.x[2]);
+	}
+	
+	int[] x;
+}

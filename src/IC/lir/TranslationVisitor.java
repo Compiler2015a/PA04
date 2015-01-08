@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Stack;
 
-import sun.awt.image.ImageAccessException;
 import IC.AST.ASTNode;
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
@@ -47,7 +46,6 @@ import IC.AST.VirtualMethod;
 import IC.AST.Visitor;
 import IC.AST.While;
 import IC.SymbolsTable.IDSymbolsKinds;
-import IC.Types.Type;
 import IC.lir.Instructions.*;
 
 public class TranslationVisitor implements Visitor{
@@ -65,7 +63,6 @@ public class TranslationVisitor implements Visitor{
 			"Runtime error: Array index out of bounds!",
 			"Runtime error: Array allocation with negative array size!",
 			"Runtime error: Division by zero!",
-			"Attempt to return from the main function!" //TODO: implement this
 	};
 	Map<String,Integer> arrs;
 
@@ -75,7 +72,7 @@ public class TranslationVisitor implements Visitor{
 	// registers
 	//private Map<String, Integer> _registers;
 	private Registers registers;
-	private int _nextRegisterNum;
+
 	//labels
 	private Labels labelHandler;
 	private Stack<String> _whileLabelStack;
@@ -194,7 +191,6 @@ public class TranslationVisitor implements Visitor{
 
 		// add new registers for this method
 		//    _registers = new HashMap<>();
-		_nextRegisterNum = 0;
 
 		// add all statements
 		for (Statement stmt : method.getStatements()) {
@@ -331,7 +327,6 @@ public class TranslationVisitor implements Visitor{
 			instructions.add(new MoveInstr(registers.request(target), new Memory(localVariable.getSymbolEntry().getGlobalId())));
 			target++;
 		}
-		// TODO what if there isn't an init value???
 		return null;
 	}
 
@@ -394,8 +389,8 @@ public class TranslationVisitor implements Visitor{
 
 		
 		if(assignmentCall)
-			/*currentAssignmentInstruction =*/instructions.add( new MoveArrayInstr(
-					registers.request(target+1), registers.request(target), // TODO check~!
+			instructions.add(new MoveArrayInstr(
+					registers.request(target+1), registers.request(target),
 					registers.request(assignmentTarget+1), false));
 		instructions.add(new MoveArrayInstr(registers.request(target+1), registers.request(target), registers.request(/*--target*/assignmentTarget), true));
 

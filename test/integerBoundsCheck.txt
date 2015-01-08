@@ -1,0 +1,5 @@
+class A {
+	static void main(string[] args) {
+		int i = 2147483648;
+	}
+}

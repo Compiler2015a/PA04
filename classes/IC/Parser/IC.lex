@@ -65,7 +65,14 @@ DecIntegerLiteral = 0+ | [1-9][0-9]*
 <YYINITIAL> {
 
   /* literals */
-  {DecIntegerLiteral}            { return token(sym.INTEGER_LITERAL, Integer.parseInt(yytext())); }
+  {DecIntegerLiteral}            {
+  									try { 
+  										return token(sym.INTEGER_LITERAL, Integer.parseInt(yytext()));
+  									}
+  									catch (NumberFormatException e) {
+  										throw new LexicalError(yytext() + " is out of integer bounds", yyline+1, yycolumn+1);
+  									}
+  								 }
   "true"           				 { return token(sym.TRUE_LITERAL, yytext()); }
   "false"           			 { return token(sym.FALSE_LITERAL, yytext()); }
   "null"           				 { return token(sym.NULL_LITERAL, yytext()); }

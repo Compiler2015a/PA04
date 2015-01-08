@@ -23,7 +23,7 @@ public class Compiler {
 			System.exit(-1);
 		}
 		ICClass libRoot = null;
-		
+
 		try {
 			if(getLibraryArgument(args)!=null) { //if library in arguments
 				//parse library file
