@@ -528,8 +528,7 @@ public class TranslationVisitor implements Visitor{
 		args.add(registers.request(target--));
 
 		// check if array size is non-negative
-		checkSizeGtZeroAndEmit(args.get(0));
-		
+		checkSizeGtZeroAndEmit(args.get(0));	
 		instructions.add(new LibraryCall(labelHandler.requestStr("__allocateArray"), args, registers.request(target)));
 
 		
